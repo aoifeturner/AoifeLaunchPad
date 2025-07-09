@@ -266,7 +266,7 @@ The following configuration has been tested and validated for AMD GPU deployment
 
 | **Service** | **Port** |
 |-------------|----------|
-| **Backend** | 8888 |
+| **Backend** | 8889 |
 | **Frontend** | 5173 |
 | **TGI Service** | 18008 |
 | **TEI Embedding** | 18090 |
