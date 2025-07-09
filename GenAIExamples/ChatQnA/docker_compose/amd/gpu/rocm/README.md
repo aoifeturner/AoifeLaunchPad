@@ -2,6 +2,8 @@
 
 This directory contains all the scripts needed to manage the ChatQnA system on AMD Ryzen.
 
+**📍 Current Location:** `/home/yw/Desktop/OPEA/LaunchPad/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm/`
+
 ## Main Management Script
 
 ### `run_chatqna.sh` - Unified Management Interface
@@ -22,6 +24,7 @@ The main script that provides a unified interface for all ChatQnA operations.
 ./run_chatqna.sh monitor-stop   # Stop monitoring
 ./run_chatqna.sh quick-eval     # Run quick evaluation
 ./run_chatqna.sh full-eval      # Setup full evaluation
+./run_chatqna.sh benchmark      # Run GenAIEval benchmark
 ./run_chatqna.sh logs           # Show service logs
 ./run_chatqna.sh monitor-logs   # Show monitoring logs
 ./run_chatqna.sh status         # Check service status
@@ -87,6 +90,20 @@ Sets up the environment for running full evaluations with the GenAIEval framewor
 ./quick_eval_setup.sh
 ```
 
+### `run_genaieval_benchmark.sh` - GenAIEval Benchmark
+Runs comprehensive load testing using the GenAIEval framework.
+
+**Usage:**
+```bash
+./run_genaieval_benchmark.sh
+```
+
+**Features:**
+- Tests 12 different concurrency levels (1-2048 users)
+- Uses Qwen/Qwen2.5-7B-Instruct-1M model
+- Generates detailed performance metrics
+- Handles gated models gracefully
+
 ## Docker Compose Files
 
 ### `compose.yaml` - Main Services
@@ -99,7 +116,7 @@ Docker-compose file for monitoring stack (Prometheus, Grafana, cAdvisor).
 
 1. **Setup Environment:**
    ```bash
-   cd /home/yw/Desktop/OPEA/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm/
+   cd /home/yw/Desktop/OPEA/LaunchPad/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm/
    ./run_chatqna.sh setup
    ```
 
@@ -118,12 +135,17 @@ Docker-compose file for monitoring stack (Prometheus, Grafana, cAdvisor).
    ./run_chatqna.sh quick-eval
    ```
 
-5. **Check Status:**
+5. **Run Benchmark (Optional):**
+   ```bash
+   ./run_chatqna.sh benchmark
+   ```
+
+6. **Check Status:**
    ```bash
    ./run_chatqna.sh status
    ```
 
-6. **View Logs:**
+7. **View Logs:**
    ```bash
    ./run_chatqna.sh logs
    ```
@@ -155,6 +177,9 @@ Docker-compose file for monitoring stack (Prometheus, Grafana, cAdvisor).
 
 # Full evaluation setup
 ./run_chatqna.sh full-eval
+
+# GenAIEval benchmark
+./run_chatqna.sh benchmark
 ```
 
 ### Monitoring
@@ -169,6 +194,26 @@ Docker-compose file for monitoring stack (Prometheus, Grafana, cAdvisor).
 # Open http://localhost:3000 in your browser
 # Username: admin, Password: admin
 ```
+
+## Recent Updates & Fixes
+
+### ✅ Benchmark Integration (Latest)
+- **Fixed**: Hugging Face authentication issues with gated models
+- **Updated**: Model configuration to use `Qwen/Qwen2.5-7B-Instruct-1M`
+- **Added**: Graceful error handling for tokenizer loading
+- **Fixed**: Locustfile path issues in GenAIEval framework
+- **Enhanced**: Benchmark script with comprehensive load testing
+
+### ✅ Monitoring Stack
+- **Fixed**: Docker network configuration issues
+- **Updated**: Prometheus scrape configurations
+- **Enhanced**: Grafana dashboards with proper container labels
+- **Added**: Unified monitoring dashboard for all microservices
+
+### ✅ Service Management
+- **Unified**: All scripts into single management interface
+- **Enhanced**: Error handling and logging
+- **Added**: Interactive menu for easy navigation
 
 ## Tested Hardware Configuration
 
@@ -206,12 +251,13 @@ The following configuration has been tested and validated for AMD GPU deployment
 | **Model Serving** | TGI (Text Generation Inference) |
 | **Embedding Service** | TEI (Text Embeddings Inference) |
 | **Vector Database** | Redis |
+| **Benchmark Framework** | GenAIEval |
 
 ### Tested Models
 
 | **Model Type** | **Model Name** | **Use Case** |
 |----------------|----------------|--------------|
-| **LLM (Standard)** | `Qwen/Qwen2.5-7B-Instruct-1M` | Production inference |
+| **LLM (Standard)** | `Qwen/Qwen2.5-7B-Instruct-1M` | Production inference & Benchmarking |
 | **LLM (Lightweight)** | `microsoft/DialoGPT-medium` | Quick testing |
 | **Embedding** | `BAAI/bge-base-en-v1.5` | Text embeddings |
 | **Reranking** | `BAAI/bge-reranker-base` | Result reranking |
@@ -226,6 +272,8 @@ The following configuration has been tested and validated for AMD GPU deployment
 | **TEI Embedding** | 18090 |
 | **TEI Reranking** | 18808 |
 | **Redis Vector** | 6379 |
+| **Grafana** | 3000 |
+| **Prometheus** | 9090 |
 
 ### Troubleshooting
 ```bash
@@ -245,32 +293,28 @@ The following configuration has been tested and validated for AMD GPU deployment
 ## Directory Structure
 
 ```
-ChatQnA/docker_compose/amd/gpu/rocm/
+/home/yw/Desktop/OPEA/LaunchPad/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm/
 ├── run_chatqna.sh              # Main management script
 ├── set_env.sh                  # Standard environment setup
 ├── set_env_lightweight.sh      # Lightweight environment setup
-├── set_env_faqgen.sh           # FAQ generation environment
-├── set_env_vllm.sh             # vLLM environment setup
-├── set_env_faqgen_vllm.sh      # FAQ generation with vLLM
 ├── start_monitoring.sh         # Start monitoring stack
 ├── restart_telemetry.sh        # Restart telemetry services
 ├── quick_test_chatqna.sh       # Quick evaluation
 ├── quick_eval_setup.sh         # Full evaluation setup
+├── run_genaieval_benchmark.sh  # GenAIEval benchmark
 ├── compose.yaml                # Main services
 ├── compose.telemetry.yaml      # Monitoring services
-├── compose_faqgen.yaml         # FAQ generation services
-├── compose_vllm.yaml           # vLLM services
-├── compose_faqgen_vllm.yaml    # FAQ generation with vLLM
 ├── grafana/                    # Grafana configuration
 │   └── dashboards/            # Dashboard JSON files
-└── SCRIPTS_README.md          # This file
+└── README.md                  # This file
 ```
 
 ## Notes
 
-- All scripts should be run from the `ChatQnA/docker_compose/amd/gpu/rocm/` directory
+- All scripts should be run from the `/home/yw/Desktop/OPEA/LaunchPad/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm/` directory
 - Make sure Docker is running before executing any scripts
 - The `run_chatqna.sh` script provides the most convenient way to manage all operations
 - Use the interactive menu (`./run_chatqna.sh`) for easy navigation
 - Check the logs if you encounter any issues
-- The monitoring stack provides detailed metrics and dashboards for system performance 
+- The monitoring stack provides detailed metrics and dashboards for system performance
+- The GenAIEval benchmark provides comprehensive load testing capabilities 
