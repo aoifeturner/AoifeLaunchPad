@@ -1,0 +1,43 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+test_suite_config:
+  examples: ["chatqna"]
+  deployment_type: "docker"  # Using docker for local evaluation
+  service_ip: "localhost"    # Local service IP
+  service_port: 8888         # ChatQnA backend port
+  warm_ups: 5               # Number of warm-up requests
+  run_time: 10m             # Test duration
+  seed: 42                  # Random seed
+  user_queries: [10, 50, 100]  # Number of test requests
+  query_timeout: 120        # Request timeout
+  random_prompt: false      # Use fixed prompts for consistency
+  collect_service_metric: false  # Don't collect metrics for now
+  data_visualization: false # Don't generate visualizations for now
+  llm_model: "meta-llama/Llama-3.1-8B-Instruct"
+  test_output_dir: "/home/yw/Desktop/OPEA/evaluation_results"
+  load_shape:
+    name: constant
+    params:
+      constant:
+        concurrent_level: 4
+  namespace: ""
+
+test_cases:
+  chatqna:
+    e2e:
+      run_test: true
+      service_name: "chatqna-backend-server"  # AMD/ROCm Docker container name
+      prompts: |
+        What is artificial intelligence and how does it work?
+        Explain the concept of machine learning in simple terms.
+        What are the main applications of AI in healthcare?
+        How does natural language processing work?
+        What is the difference between supervised and unsupervised learning?
+        Explain the concept of neural networks.
+        What are the ethical considerations in AI development?
+        How does computer vision technology work?
+        What is deep learning and why is it important?
+        Explain the concept of reinforcement learning.
+      max_output: 256  # Maximum output tokens
+      dataset: "/home/yw/Desktop/OPEA/GenAIEval/evals/benchmark/data/upload_file.txt" 
