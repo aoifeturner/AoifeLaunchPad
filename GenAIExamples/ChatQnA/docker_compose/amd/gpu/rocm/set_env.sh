@@ -26,7 +26,7 @@ export HOST_IP_EXTERNAL=$(hostname -I | awk '{print $1}')
 # =============================================================================
 
 export CHATQNA_EMBEDDING_MODEL_ID="BAAI/bge-base-en-v1.5"
-export CHATQNA_HUGGINGFACEHUB_API_TOKEN=""# or your actual HF token
+export CHATQNA_HUGGINGFACEHUB_API_TOKEN="" # or your actual HF token
 export CHATQNA_LLM_MODEL_ID="Qwen/Qwen2.5-7B-Instruct-1M"
 export CHATQNA_RERANK_MODEL_ID="BAAI/bge-reranker-base"
 
@@ -36,7 +36,7 @@ export CHATQNA_RERANK_MODEL_ID="BAAI/bge-reranker-base"
 
 export CHATQNA_BACKEND_SERVICE_PORT=8889
 export CHATQNA_FRONTEND_SERVICE_PORT=5173
-export CHATQNA_NGINX_PORT=80
+export CHATQNA_NGINX_PORT=8080
 export CHATQNA_REDIS_DATAPREP_PORT=18103
 export CHATQNA_REDIS_RETRIEVER_PORT=7000
 export CHATQNA_REDIS_VECTOR_INSIGHT_PORT=8001

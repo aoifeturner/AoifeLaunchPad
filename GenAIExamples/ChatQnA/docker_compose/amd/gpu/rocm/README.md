@@ -274,6 +274,7 @@ The following configuration has been tested and validated for AMD GPU deployment
 | **Redis Vector** | 6379 |
 | **Grafana** | 3000 |
 | **Prometheus** | 9090 |
+| **Nginx (reverse proxy)** | 8080 |
 
 ### Troubleshooting
 ```bash
@@ -318,3 +319,4 @@ The following configuration has been tested and validated for AMD GPU deployment
 - Check the logs if you encounter any issues
 - The monitoring stack provides detailed metrics and dashboards for system performance
 - The GenAIEval benchmark provides comprehensive load testing capabilities 
+- **Note:** Nginx is now mapped to port 8080 (not 80) to avoid conflicts with other services. Access the reverse proxy via `http://localhost:8080` if needed.
