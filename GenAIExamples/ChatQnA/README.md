@@ -47,30 +47,6 @@ Sets up environment variables for lightweight testing with smaller models.
 source set_env_lightweight.sh
 ```
 
-### `set_env_faqgen.sh` - FAQ Generation Environment
-Sets up environment variables for FAQ generation mode.
-
-**Usage:**
-```bash
-source set_env_faqgen.sh
-```
-
-### `set_env_vllm.sh` - vLLM Environment Setup
-Sets up environment variables for vLLM-based inference.
-
-**Usage:**
-```bash
-source set_env_vllm.sh
-```
-
-### `set_env_faqgen_vllm.sh` - FAQ Generation with vLLM
-Sets up environment variables for FAQ generation using vLLM.
-
-**Usage:**
-```bash
-source set_env_faqgen_vllm.sh
-```
-
 ## Monitoring Scripts
 
 ### `start_monitoring.sh` - Start Monitoring Stack
@@ -118,15 +94,6 @@ The main docker-compose file for ChatQnA services.
 
 ### `compose.telemetry.yaml` - Monitoring Services
 Docker-compose file for monitoring stack (Prometheus, Grafana, cAdvisor).
-
-### `compose_faqgen.yaml` - FAQ Generation Services
-Docker-compose file for FAQ generation mode.
-
-### `compose_vllm.yaml` - vLLM Services
-Docker-compose file for vLLM-based inference.
-
-### `compose_faqgen_vllm.yaml` - FAQ Generation with vLLM
-Docker-compose file for FAQ generation using vLLM.
 
 ## Quick Start Guide
 
