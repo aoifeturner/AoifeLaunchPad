@@ -5,12 +5,23 @@
 
 set -e  # Exit on any error
 
+# Add after set -e
+BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../../.." && pwd)"
+GENAIEXAMPLES_DIR="$BASEDIR/GenAIExamples"
+GENAIEVAL_DIR="$BASEDIR/GenAIEval"
+EVAL_RESULTS_DIR="$BASEDIR/evaluation_results"
+
+# Replace all hardcoded paths:
+# /home/yw/Desktop/OPEA/GenAIEval -> $GENAIEVAL_DIR
+# /home/yw/Desktop/OPEA/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm -> $GENAIEXAMPLES_DIR/ChatQnA/docker_compose/amd/gpu/rocm
+# /home/yw/Desktop/OPEA/evaluation_results -> $EVAL_RESULTS_DIR
+
 echo "🚀 OPEA ChatQnA Evaluation Setup"
 echo "================================="
 
 # Colors for output
 RED='\033[0;31m'
-GREEN='\033[0;32m'
+GREEN='\0333[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
@@ -83,7 +94,7 @@ setup_env() {
 setup_genaieval() {
     print_status "Setting up GenAIEval..."
     
-    cd /home/yw/Desktop/OPEA/GenAIEval
+    cd $GENAIEVAL_DIR
     
     # Create virtual environment if it doesn't exist
     if [ ! -d "opea_eval_env" ]; then
@@ -106,7 +117,7 @@ setup_genaieval() {
 deploy_chatqna() {
     print_status "Deploying ChatQnA application (AMD/ROCm configuration)..."
     
-    cd /home/yw/Desktop/OPEA/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm
+    cd $GENAIEXAMPLES_DIR/ChatQnA/docker_compose/amd/gpu/rocm
     
     # Check if services are already running
     if docker ps --format "table {{.Names}}" | grep -q "chatqna-backend-server"; then
@@ -158,22 +169,22 @@ test_chatqna() {
 run_evaluation() {
     print_status "Running ChatQnA evaluation..."
     
-    cd /home/yw/Desktop/OPEA/GenAIEval
+    cd $GENAIEVAL_DIR
     
     # Activate virtual environment
     source opea_eval_env/bin/activate
     
     # Create results directory
-    mkdir -p /home/yw/Desktop/OPEA/evaluation_results
+    mkdir -p $EVAL_RESULTS_DIR
     
     # Run simple evaluation
     print_status "Starting evaluation (this will take a few minutes)..."
     python evals/benchmark/chatqna_simple_eval.py \
         --service-url http://localhost:8889 \
-        --output /home/yw/Desktop/OPEA/evaluation_results/chatqna_eval.json
+        --output $EVAL_RESULTS_DIR/chatqna_eval.json
     
     print_success "Evaluation completed!"
-    print_status "Results saved to: /home/yw/Desktop/OPEA/evaluation_results/chatqna_eval.json"
+    print_status "Results saved to: $EVAL_RESULTS_DIR/chatqna_eval.json"
 }
 
 # Show results
@@ -181,12 +192,12 @@ show_results() {
     print_status "Evaluation Results Summary:"
     echo "=================================="
     
-    if [ -f "/home/yw/Desktop/OPEA/evaluation_results/chatqna_eval.json" ]; then
+    if [ -f "$EVAL_RESULTS_DIR/chatqna_eval.json" ]; then
         # Extract and display key metrics
         python3 -c "
 import json
 try:
-    with open('/home/yw/Desktop/OPEA/evaluation_results/chatqna_eval.json', 'r') as f:
+    with open('$EVAL_RESULTS_DIR/chatqna_eval.json', 'r') as f:
         data = json.load(f)
     
     summary = data.get('evaluation_summary', {})
@@ -206,7 +217,7 @@ try:
         if quality:
             print(f'📝 Avg Response Length: {quality.get(\"avg_response_length\", \"N/A\"):.0f} chars')
         
-        print(f'📊 Full results: /home/yw/Desktop/OPEA/evaluation_results/chatqna_eval.json')
+        print(f'📊 Full results: $EVAL_RESULTS_DIR/chatqna_eval.json')
 except Exception as e:
     print('❌ Error reading results:', str(e))
 "
@@ -232,10 +243,10 @@ main() {
     echo "🎉 Setup and evaluation completed!"
     echo ""
     echo "Next steps:"
-    echo "1. View detailed results: cat /home/yw/Desktop/OPEA/evaluation_results/chatqna_eval.json"
+    echo "1. View detailed results: cat $EVAL_RESULTS_DIR/chatqna_eval.json"
     echo "2. Access ChatQnA UI: http://localhost:5173"
-    echo "3. Stop services: cd /home/yw/Desktop/OPEA/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm && docker compose down"
-    echo "4. Read the full guide: /home/yw/Desktop/OPEA/CHATQNA_EVALUATION_GUIDE.md"
+    echo "3. Stop services: cd $GENAIEXAMPLES_DIR/ChatQnA/docker_compose/amd/gpu/rocm && docker compose down"
+    echo "4. Read the full guide: $BASEDIR/CHATQNA_EVALUATION_GUIDE.md"
 }
 
 # Handle command line arguments
@@ -254,7 +265,7 @@ case "${1:-}" in
         ;;
     "cleanup")
         print_status "Stopping ChatQnA services..."
-        cd /home/yw/Desktop/OPEA/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm
+        cd $GENAIEXAMPLES_DIR/ChatQnA/docker_compose/amd/gpu/rocm
         docker compose down
         print_success "Services stopped"
         ;;

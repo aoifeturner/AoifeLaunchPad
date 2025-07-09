@@ -5,6 +5,11 @@
 
 set -e
 
+BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../../.." && pwd)"
+GENAIEXAMPLES_DIR="$BASEDIR/GenAIExamples"
+GENAIEVAL_DIR="$BASEDIR/GenAIEval"
+EVAL_RESULTS_DIR="$BASEDIR/evaluation_results"
+
 echo "🚀 Quick ChatQnA Test Setup"
 echo "============================"
 
@@ -48,7 +53,7 @@ check_services() {
 start_chatqna() {
     print_status "Starting ChatQnA with lightweight configuration..."
     
-    cd /home/yw/Desktop/OPEA/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm
+    cd "$GENAIEXAMPLES_DIR/ChatQnA/docker_compose/amd/gpu/rocm"
     
     # Source lightweight environment
     source ./set_env_lightweight.sh
@@ -105,7 +110,7 @@ test_service() {
 run_quick_eval() {
     print_status "Running quick evaluation..."
     
-    cd /home/yw/Desktop/OPEA/GenAIEval
+    cd "$GENAIEVAL_DIR"
     
     # Activate virtual environment
     if [ -d "opea_eval_env" ]; then
@@ -119,13 +124,13 @@ run_quick_eval() {
     fi
     
     # Create results directory
-    mkdir -p /home/yw/Desktop/OPEA/evaluation_results
+    mkdir -p "$EVAL_RESULTS_DIR"
     
     # Run lightweight evaluation
     print_status "Running lightweight evaluation (should complete in 1-2 minutes)..."
     python evals/benchmark/chatqna_lightweight_eval.py \
         --service-url http://localhost:8889 \
-        --output /home/yw/Desktop/OPEA/evaluation_results/chatqna_quick_test.json
+        --output "$EVAL_RESULTS_DIR/chatqna_quick_test.json"
     
     print_success "Quick evaluation completed!"
 }
@@ -135,11 +140,11 @@ show_results() {
     print_status "Quick Test Results:"
     echo "====================="
     
-    if [ -f "/home/yw/Desktop/OPEA/evaluation_results/chatqna_quick_test.json" ]; then
+    if [ -f "$EVAL_RESULTS_DIR/chatqna_quick_test.json" ]; then
         python3 -c "
 import json
 try:
-    with open('/home/yw/Desktop/OPEA/evaluation_results/chatqna_quick_test.json', 'r') as f:
+    with open('$EVAL_RESULTS_DIR/chatqna_quick_test.json', 'r') as f:
         data = json.load(f)
     
     summary = data.get('evaluation_summary', {})
@@ -152,7 +157,7 @@ try:
         print(f'⏱️  Avg Response Time: {summary.get(\"avg_response_time\", \"N/A\"):.2f}s')
         print(f'📝 Avg Response Length: {summary.get(\"avg_response_length\", \"N/A\"):.0f} chars')
         
-        print(f'\\n📊 Full results: /home/yw/Desktop/OPEA/evaluation_results/chatqna_quick_test.json')
+        print(f'\\n📊 Full results: $EVAL_RESULTS_DIR/chatqna_quick_test.json')
 except Exception as e:
     print('❌ Error reading results:', str(e))
 "
@@ -178,10 +183,10 @@ main() {
     echo "🎉 Quick test completed!"
     echo ""
     echo "Next steps:"
-    echo "1. View detailed results: cat /home/yw/Desktop/OPEA/evaluation_results/chatqna_quick_test.json"
+    echo "1. View detailed results: cat $EVAL_RESULTS_DIR/chatqna_quick_test.json"
     echo "2. Access ChatQnA UI: http://localhost:5173"
-    echo "3. Stop services: cd /home/yw/Desktop/OPEA/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm && docker compose down"
-    echo "4. Run full evaluation: /home/yw/Desktop/OPEA/quick_eval_setup.sh"
+    echo "3. Stop services: cd $GENAIEXAMPLES_DIR/ChatQnA/docker_compose/amd/gpu/rocm && docker compose down"
+    echo "4. Run full evaluation: $BASEDIR/quick_eval_setup.sh"
 }
 
 # Handle command line arguments
@@ -199,7 +204,7 @@ case "${1:-}" in
         ;;
     "stop")
         print_status "Stopping ChatQnA services..."
-        cd /home/yw/Desktop/OPEA/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm
+        cd "$GENAIEXAMPLES_DIR/ChatQnA/docker_compose/amd/gpu/rocm"
         docker compose down
         print_success "Services stopped"
         ;;
