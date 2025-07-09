@@ -110,6 +110,9 @@ Fixes Redis index issues common on remote nodes with newer Docker images.
 ### `quick_test_chatqna.sh`
 Tests the complete ChatQnA system.
 
+### `detect_issues.sh`
+Detects common issues on fresh remote node deployments.
+
 ## Documentation
 
 For detailed setup instructions and troubleshooting, see:

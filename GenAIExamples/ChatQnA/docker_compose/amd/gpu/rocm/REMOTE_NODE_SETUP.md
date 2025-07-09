@@ -202,6 +202,49 @@ curl http://localhost:5173         # Frontend
 
 ## Troubleshooting Commands
 
+### Automated Issue Detection
+```bash
+# Complete detection of all common issues
+./detect_issues.sh
+
+# Specific issue checks
+./detect_issues.sh redis-only      # Check Redis index
+./detect_issues.sh retriever-only  # Test retriever service
+./detect_issues.sh backend-only    # Test backend service
+./detect_issues.sh cors-only       # Check CORS configuration
+./detect_issues.sh logs-only       # Check logs for errors
+```
+
+### Manual Issue Detection
+
+**Check Redis Index:**
+```bash
+docker exec chatqna-redis-vector-db redis-cli FT.INFO rag-redis
+# Expected: Index info or "Unknown index name"
+```
+
+**Test Retriever Service:**
+```bash
+curl -X POST http://localhost:7000/v1/retrieval \
+  -H "Content-Type: application/json" \
+  -d '{"query": "test", "top_k": 3}'
+# Expected: {"retrieved_docs":[]} or 500 error
+```
+
+**Test Backend Service:**
+```bash
+curl -X POST http://localhost:8889/v1/chatqna \
+  -H "Content-Type: application/json" \
+  -d '{"messages": "Hello"}'
+# Expected: JSON response or 500 error
+```
+
+**Check Logs for Errors:**
+```bash
+docker-compose logs retriever | grep -i "redis\|index"
+# Look for: "rag-redis: no such index"
+```
+
 ### Check Service Status
 ```bash
 # List running containers
@@ -327,4 +370,18 @@ Tests the complete ChatQnA system.
 ```bash
 ./quick_test_chatqna.sh eval-only  # Run evaluation test
 ./quick_test_chatqna.sh help       # Show all options
+```
+
+### `detect_issues.sh`
+Detects common issues on fresh remote node deployments.
+
+**Usage**:
+```bash
+./detect_issues.sh                 # Complete detection (all checks)
+./detect_issues.sh redis-only      # Check Redis index status
+./detect_issues.sh retriever-only  # Test retriever service
+./detect_issues.sh backend-only    # Test backend service
+./detect_issues.sh cors-only       # Check CORS configuration
+./detect_issues.sh logs-only       # Check logs for errors
+./detect_issues.sh help            # Show all options
 ``` 

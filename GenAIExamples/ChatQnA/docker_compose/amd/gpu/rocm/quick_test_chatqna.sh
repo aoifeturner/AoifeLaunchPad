@@ -111,9 +111,11 @@ run_quick_eval() {
     print_status "Running quick evaluation..."
     
     cd "$GENAIEVAL_DIR"
+    print_status "Changed to directory: $(pwd)"
     
     # Activate virtual environment
     if [ -d "opea_eval_env" ]; then
+        print_status "Found existing virtual environment, activating..."
         source opea_eval_env/bin/activate
     else
         print_warning "GenAIEval environment not found, creating it..."
