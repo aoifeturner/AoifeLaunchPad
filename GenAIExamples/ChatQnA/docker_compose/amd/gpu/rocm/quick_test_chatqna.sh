@@ -85,7 +85,7 @@ test_service() {
     # Test with a simple query
     print_status "Sending test query..."
     
-    response=$(curl -s -w "\n%{http_code}" http://localhost:8888/v1/chatqna \
+    response=$(curl -s -w "\n%{http_code}" http://localhost:8889/v1/chatqna \
         -H "Content-Type: application/json" \
         -d '{"messages": "Hello"}' 2>/dev/null || echo "Connection failed")
     
@@ -124,7 +124,7 @@ run_quick_eval() {
     # Run lightweight evaluation
     print_status "Running lightweight evaluation (should complete in 1-2 minutes)..."
     python evals/benchmark/chatqna_lightweight_eval.py \
-        --service-url http://localhost:8888 \
+        --service-url http://localhost:8889 \
         --output /home/yw/Desktop/OPEA/evaluation_results/chatqna_quick_test.json
     
     print_success "Quick evaluation completed!"

@@ -144,7 +144,7 @@ test_chatqna() {
     sleep 10
     
     # Test the service
-    if curl -s http://localhost:8888/v1/chatqna \
+    if curl -s http://localhost:8889/v1/chatqna \
         -H "Content-Type: application/json" \
         -d '{"messages": "Hello"}' > /dev/null 2>&1; then
         print_success "ChatQnA service is responding"
@@ -169,7 +169,7 @@ run_evaluation() {
     # Run simple evaluation
     print_status "Starting evaluation (this will take a few minutes)..."
     python evals/benchmark/chatqna_simple_eval.py \
-        --service-url http://localhost:8888 \
+        --service-url http://localhost:8889 \
         --output /home/yw/Desktop/OPEA/evaluation_results/chatqna_eval.json
     
     print_success "Evaluation completed!"

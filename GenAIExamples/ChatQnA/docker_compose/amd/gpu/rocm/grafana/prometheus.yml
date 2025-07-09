@@ -25,7 +25,7 @@ scrape_configs:
   # ChatQnA Backend Server
   - job_name: 'chatqna-backend'
     static_configs:
-      - targets: ['chatqna-backend-server:8888']
+      - targets: ['chatqna-backend-server:8889']
     metrics_path: '/metrics'
     scrape_interval: 10s
 
