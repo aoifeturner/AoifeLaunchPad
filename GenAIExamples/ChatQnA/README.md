@@ -203,6 +203,63 @@ Docker-compose file for FAQ generation using vLLM.
 # Username: admin, Password: admin
 ```
 
+## Tested Hardware Configuration
+
+The following configuration has been tested and validated for AMD GPU deployment:
+
+### System Specifications
+
+| **Component** | **Specification** |
+|---------------|-------------------|
+| **CPU** | AMD Ryzen AI 9 HX 370 w/ Radeon 890M |
+| **Architecture** | x86_64 |
+| **Cores/Threads** | 12 cores, 24 threads |
+| **Memory** | 93GB RAM |
+| **Storage** | 8GB Swap available |
+| **Operating System** | Ubuntu 24.04 LTS |
+| **Kernel** | 6.11.0-28-generic |
+| **Docker Version** | 28.2.2 |
+
+### GPU & AI Acceleration
+
+| **Component** | **Specification** |
+|---------------|-------------------|
+| **Integrated GPU** | AMD Radeon 890M |
+| **GPU Architecture** | AMD RDNA 3.5 |
+| **AI Engine** | AMD Ryzen AI Engine (XDNA 2) |
+| **Memory Usage** | ~7.4GB used / 93GB available |
+| **CPU Utilization** | ~54% scaling frequency |
+
+### Software Stack
+
+| **Component** | **Version/Model** |
+|---------------|-------------------|
+| **Container Runtime** | Docker Compose |
+| **AI Framework** | OPEA (Open Platform for Edge AI) |
+| **Model Serving** | TGI (Text Generation Inference) |
+| **Embedding Service** | TEI (Text Embeddings Inference) |
+| **Vector Database** | Redis |
+
+### Tested Models
+
+| **Model Type** | **Model Name** | **Use Case** |
+|----------------|----------------|--------------|
+| **LLM (Standard)** | `Qwen/Qwen2.5-7B-Instruct-1M` | Production inference |
+| **LLM (Lightweight)** | `microsoft/DialoGPT-medium` | Quick testing |
+| **Embedding** | `BAAI/bge-base-en-v1.5` | Text embeddings |
+| **Reranking** | `BAAI/bge-reranker-base` | Result reranking |
+
+### Deployment Ports
+
+| **Service** | **Port** |
+|-------------|----------|
+| **Backend** | 8888 |
+| **Frontend** | 5173 |
+| **TGI Service** | 18008 |
+| **TEI Embedding** | 18090 |
+| **TEI Reranking** | 18808 |
+| **Redis Vector** | 6379 |
+
 ### Troubleshooting
 ```bash
 # Check service status
