@@ -1,6 +1,6 @@
-# ChatQnA Scripts Directory
+# ChatQnA One-Click Deployment
 
-This directory contains all the scripts needed to manage the ChatQnA system on AMD GPU with ROCm.
+This directory contains all the scripts needed to manage the ChatQnA system on AMD Ryzen.
 
 ## Main Management Script
 
