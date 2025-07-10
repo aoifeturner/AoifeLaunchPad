@@ -22,10 +22,17 @@ scrape_configs:
     static_configs:
       - targets: ['node-exporter:9100']
 
-  # ChatQnA Backend Server
-  - job_name: 'chatqna-backend'
+  # ChatQnA Backend Server (TGI)
+  - job_name: 'chatqna-backend-tgi'
     static_configs:
       - targets: ['chatqna-backend-server:8889']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # ChatQnA Backend Server (vLLM)
+  - job_name: 'chatqna-backend-vllm'
+    static_configs:
+      - targets: ['chatqna-backend-server:8890']
     metrics_path: '/metrics'
     scrape_interval: 10s
 
@@ -36,35 +43,56 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 10s
 
-  # TEI Embedding Service
+  # vLLM Service (LLM)
+  - job_name: 'vllm-service'
+    static_configs:
+      - targets: ['chatqna-vllm-service:8011']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # TEI Embedding Service (shared)
   - job_name: 'tei-embedding'
     static_configs:
       - targets: ['chatqna-tei-embedding-service:80']
     metrics_path: '/metrics'
     scrape_interval: 10s
 
-  # TEI Reranking Service
+  # TEI Reranking Service (shared)
   - job_name: 'tei-reranking'
     static_configs:
       - targets: ['chatqna-tei-reranking-service:80']
     metrics_path: '/metrics'
     scrape_interval: 10s
 
-  # Retriever Service
-  - job_name: 'retriever'
+  # Retriever Service (TGI)
+  - job_name: 'retriever-tgi'
     static_configs:
       - targets: ['chatqna-retriever:7000']
     metrics_path: '/metrics'
     scrape_interval: 10s
 
-  # Data Prep Service
-  - job_name: 'dataprep'
+  # Retriever Service (vLLM)
+  - job_name: 'retriever-vllm'
+    static_configs:
+      - targets: ['chatqna-retriever:7001']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Data Prep Service (TGI)
+  - job_name: 'dataprep-tgi'
     static_configs:
       - targets: ['chatqna-dataprep-service:5000']
     metrics_path: '/metrics'
     scrape_interval: 10s
 
-  # Redis Vector Database
+  # Data Prep Service (vLLM)
+  - job_name: 'dataprep-vllm'
+    static_configs:
+      - targets: ['chatqna-dataprep-service:18104']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Redis Vector Database (shared)
   - job_name: 'redis'
     static_configs:
       - targets: ['chatqna-redis-vector-db:6379']
