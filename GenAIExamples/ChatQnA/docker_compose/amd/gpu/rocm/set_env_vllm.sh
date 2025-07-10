@@ -43,7 +43,7 @@ export CHATQNA_REDIS_VECTOR_INSIGHT_PORT=8001
 export CHATQNA_REDIS_VECTOR_PORT=6379
 export CHATQNA_TEI_EMBEDDING_PORT=18090
 export CHATQNA_TEI_RERANKING_PORT=18808
-export CHATQNA_VLLM_SERVICE_PORT=18008
+export CHATQNA_VLLM_SERVICE_PORT=18009
 
 # =============================================================================
 # SERVICE ENDPOINTS (External Access)
