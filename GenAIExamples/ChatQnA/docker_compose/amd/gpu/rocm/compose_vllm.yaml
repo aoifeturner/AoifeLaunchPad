@@ -6,8 +6,8 @@ services:
     image: redis/redis-stack:7.2.0-v9
     container_name: chatqna-redis-vector-db
     ports:
-      - "${CHATQNA_REDIS_VECTOR_PORT:-6379}:6379"
-      - "${CHATQNA_REDIS_VECTOR_INSIGHT_PORT:-8001}:8001"
+      - "${CHATQNA_REDIS_VECTOR_PORT:-6380}:6379"
+      - "${CHATQNA_REDIS_VECTOR_INSIGHT_PORT:-8002}:8001"
     networks:
       - rocm_default
 
@@ -18,7 +18,7 @@ services:
       - chatqna-redis-vector-db
       - chatqna-tei-embedding-service
     ports:
-      - "${CHATQNA_REDIS_DATAPREP_PORT:-18103}:5000"
+      - "${CHATQNA_REDIS_DATAPREP_PORT:-18104}:5000"
     environment:
       no_proxy: ${no_proxy:-}
       http_proxy: ${http_proxy:-}
@@ -60,7 +60,7 @@ services:
       - chatqna-redis-vector-db
       - chatqna-tei-embedding-service
     ports:
-      - "${CHATQNA_REDIS_RETRIEVER_PORT:-7000}:7000"
+      - "${CHATQNA_REDIS_RETRIEVER_PORT:-7001}:7000"
     ipc: host
     environment:
       no_proxy: ${no_proxy:-}

@@ -34,7 +34,7 @@ export CHATQNA_RERANK_MODEL_ID="BAAI/bge-reranker-base"
 # PORT CONFIGURATION
 # =============================================================================
 
-export CHATQNA_BACKEND_SERVICE_PORT=8890
+export CHATQNA_BACKEND_SERVICE_PORT=8888
 export CHATQNA_FRONTEND_SERVICE_PORT=5173
 export CHATQNA_NGINX_PORT=80
 export CHATQNA_REDIS_DATAPREP_PORT=18103
@@ -43,7 +43,7 @@ export CHATQNA_REDIS_VECTOR_INSIGHT_PORT=8001
 export CHATQNA_REDIS_VECTOR_PORT=6379
 export CHATQNA_TEI_EMBEDDING_PORT=18090
 export CHATQNA_TEI_RERANKING_PORT=18808
-export CHATQNA_VLLM_SERVICE_PORT=18009
+export CHATQNA_VLLM_SERVICE_PORT=18008
 
 # =============================================================================
 # SERVICE ENDPOINTS (External Access)
