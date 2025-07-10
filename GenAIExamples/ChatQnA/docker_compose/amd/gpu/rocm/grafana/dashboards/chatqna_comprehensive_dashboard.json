@@ -1,0 +1,574 @@
+{
+  "id": null,
+  "title": "ChatQnA Comprehensive Dashboard",
+  "tags": ["chatqna", "comprehensive", "monitoring", "ai", "llm"],
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    {
+      "type": "row",
+      "title": "System Overview",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
+      "collapsed": false
+    },
+    {
+      "type": "stat",
+      "title": "Total Services Running",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "count(up{job=~\".*\"})",
+        "legendFormat": "Services"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 8}
+            ]
+          }
+        }
+      },
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 1}
+    },
+    {
+      "type": "stat",
+      "title": "System CPU Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+        "legendFormat": "CPU %"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 70},
+              {"color": "red", "value": 90}
+            ]
+          }
+        }
+      },
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 1}
+    },
+    {
+      "type": "stat",
+      "title": "System Memory Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
+        "legendFormat": "Memory %"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 80},
+              {"color": "red", "value": 95}
+            ]
+          }
+        }
+      },
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 1}
+    },
+    {
+      "type": "stat",
+      "title": "System Load Average",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "node_load1",
+        "legendFormat": "1m Load"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 2},
+              {"color": "red", "value": 5}
+            ]
+          }
+        }
+      },
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 1}
+    },
+    {
+      "type": "row",
+      "title": "TGI Service (LLM)",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 5},
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "TGI Request Rate",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "rate(tgi_request_count[1m])",
+        "legendFormat": "Requests/s"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 6}
+    },
+    {
+      "type": "timeseries",
+      "title": "TGI Success Rate",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "rate(tgi_request_success[1m])",
+        "legendFormat": "Success/s"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 6}
+    },
+    {
+      "type": "timeseries",
+      "title": "TGI Inference Operations",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(tgi_batch_inference_count{method=\"prefill\"}[1m])",
+          "legendFormat": "Prefill/s"
+        },
+        {
+          "expr": "rate(tgi_batch_inference_count{method=\"decode\"}[1m])",
+          "legendFormat": "Decode/s"
+        }
+      ],
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 6}
+    },
+    {
+      "type": "timeseries",
+      "title": "TGI CPU Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=\"chatqna-tgi-service\"}[1m])) * 100",
+        "legendFormat": "CPU %"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 12}
+    },
+    {
+      "type": "timeseries",
+      "title": "TGI Memory Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "container_memory_usage_bytes{container_label_com_docker_compose_service=\"chatqna-tgi-service\"} / 1024 / 1024",
+        "legendFormat": "Memory MB"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 12}
+    },
+    {
+      "type": "timeseries",
+      "title": "TGI GPU Memory (if available)",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "nvidia_gpu_memory_used_bytes{container_label_com_docker_compose_service=\"chatqna-tgi-service\"} / 1024 / 1024",
+        "legendFormat": "GPU Memory MB"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 12}
+    },
+    {
+      "type": "row",
+      "title": "TEI Services",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 18},
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "TEI Embedding Request Rate",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "rate(te_request_count{method=\"single\"}[1m])",
+        "legendFormat": "Embedding Requests/s"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 19}
+    },
+    {
+      "type": "timeseries",
+      "title": "TEI Embedding Success Rate",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "rate(te_embed_success[1m])",
+        "legendFormat": "Embedding Success/s"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 19}
+    },
+    {
+      "type": "timeseries",
+      "title": "TEI Embedding Duration",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "histogram_quantile(0.95, rate(te_embed_duration_bucket[5m]))",
+        "legendFormat": "95th percentile"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 19}
+    },
+    {
+      "type": "timeseries",
+      "title": "TEI Embedding CPU Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=\"chatqna-tei-embedding-service\"}[1m])) * 100",
+        "legendFormat": "CPU %"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 25}
+    },
+    {
+      "type": "timeseries",
+      "title": "TEI Embedding Memory Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "container_memory_usage_bytes{container_label_com_docker_compose_service=\"chatqna-tei-embedding-service\"} / 1024 / 1024",
+        "legendFormat": "Memory MB"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 25}
+    },
+    {
+      "type": "timeseries",
+      "title": "TEI Reranking CPU Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=\"chatqna-tei-reranking-service\"}[1m])) * 100",
+        "legendFormat": "CPU %"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 25}
+    },
+    {
+      "type": "row",
+      "title": "Retriever Service",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 31},
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "Retriever Request Rate",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "rate(http_requests_total{handler=\"/v1/retrieval\"}[1m])",
+        "legendFormat": "Retrieval Requests/s"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 32}
+    },
+    {
+      "type": "timeseries",
+      "title": "Retriever Response Time",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{handler=\"/v1/retrieval\"}[5m]))",
+        "legendFormat": "95th percentile"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 32}
+    },
+    {
+      "type": "timeseries",
+      "title": "Retriever CPU Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=\"chatqna-retriever\"}[1m])) * 100",
+        "legendFormat": "CPU %"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 32}
+    },
+    {
+      "type": "timeseries",
+      "title": "Retriever Memory Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "container_memory_usage_bytes{container_label_com_docker_compose_service=\"chatqna-retriever\"} / 1024 / 1024",
+        "legendFormat": "Memory MB"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 38}
+    },
+    {
+      "type": "row",
+      "title": "Data Preparation Service",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 44},
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "Dataprep Health Check Rate",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "rate(http_requests_total{handler=\"/v1/health_check\"}[1m])",
+        "legendFormat": "Health Checks/s"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 45}
+    },
+    {
+      "type": "timeseries",
+      "title": "Dataprep File Operations",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "rate(http_requests_total{handler=\"/v1/dataprep/get\"}[1m])",
+        "legendFormat": "File Operations/s"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 45}
+    },
+    {
+      "type": "timeseries",
+      "title": "Dataprep CPU Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=\"chatqna-dataprep-service\"}[1m])) * 100",
+        "legendFormat": "CPU %"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 45}
+    },
+    {
+      "type": "timeseries",
+      "title": "Dataprep Memory Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "container_memory_usage_bytes{container_label_com_docker_compose_service=\"chatqna-dataprep-service\"} / 1024 / 1024",
+        "legendFormat": "Memory MB"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 51}
+    },
+    {
+      "type": "row",
+      "title": "Backend & UI Services",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 57},
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "Backend CPU Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=\"chatqna-backend-server\"}[1m])) * 100",
+        "legendFormat": "CPU %"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 58}
+    },
+    {
+      "type": "timeseries",
+      "title": "Backend Memory Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "container_memory_usage_bytes{container_label_com_docker_compose_service=\"chatqna-backend-server\"} / 1024 / 1024",
+        "legendFormat": "Memory MB"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 58}
+    },
+    {
+      "type": "timeseries",
+      "title": "UI CPU Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=\"chatqna-ui-server\"}[1m])) * 100",
+        "legendFormat": "CPU %"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 58}
+    },
+    {
+      "type": "timeseries",
+      "title": "UI Memory Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "container_memory_usage_bytes{container_label_com_docker_compose_service=\"chatqna-ui-server\"} / 1024 / 1024",
+        "legendFormat": "Memory MB"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 64}
+    },
+    {
+      "type": "timeseries",
+      "title": "Nginx CPU Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=\"chatqna-nginx-server\"}[1m])) * 100",
+        "legendFormat": "CPU %"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 64}
+    },
+    {
+      "type": "timeseries",
+      "title": "Nginx Memory Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "container_memory_usage_bytes{container_label_com_docker_compose_service=\"chatqna-nginx-server\"} / 1024 / 1024",
+        "legendFormat": "Memory MB"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 64}
+    },
+    {
+      "type": "row",
+      "title": "Redis Vector Database",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 70},
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "Redis CPU Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=\"chatqna-redis-vector-db\"}[1m])) * 100",
+        "legendFormat": "CPU %"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 71}
+    },
+    {
+      "type": "timeseries",
+      "title": "Redis Memory Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "container_memory_usage_bytes{container_label_com_docker_compose_service=\"chatqna-redis-vector-db\"} / 1024 / 1024",
+        "legendFormat": "Memory MB"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 71}
+    },
+    {
+      "type": "timeseries",
+      "title": "Redis Connected Clients",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "redis_connected_clients",
+        "legendFormat": "Connected Clients"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 71}
+    },
+    {
+      "type": "row",
+      "title": "Network & Disk I/O",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 77},
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "Network Receive Rate",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "rate(node_network_receive_bytes_total[1m])",
+        "legendFormat": "{{device}}"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 78}
+    },
+    {
+      "type": "timeseries",
+      "title": "Network Transmit Rate",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "rate(node_network_transmit_bytes_total[1m])",
+        "legendFormat": "{{device}}"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 78}
+    },
+    {
+      "type": "timeseries",
+      "title": "Disk I/O Rate",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "rate(node_disk_io_time_seconds_total[1m])",
+        "legendFormat": "{{device}}"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 78}
+    },
+    {
+      "type": "timeseries",
+      "title": "Disk Space Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "(1 - node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100",
+        "legendFormat": "{{mountpoint}}"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 84}
+    },
+    {
+      "type": "row",
+      "title": "Service Health Status",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 90},
+      "collapsed": false
+    },
+    {
+      "type": "stat",
+      "title": "Service Health Overview",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "up{job=\"tgi-service\"}",
+          "legendFormat": "TGI Service"
+        },
+        {
+          "expr": "up{job=\"tei-embedding\"}",
+          "legendFormat": "TEI Embedding"
+        },
+        {
+          "expr": "up{job=\"tei-reranking\"}",
+          "legendFormat": "TEI Reranking"
+        },
+        {
+          "expr": "up{job=\"retriever-tgi\"}",
+          "legendFormat": "Retriever"
+        },
+        {
+          "expr": "up{job=\"dataprep-tgi\"}",
+          "legendFormat": "Dataprep"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          }
+        }
+      },
+      "gridPos": {"h": 4, "w": 12, "x": 0, "y": 91}
+    },
+    {
+      "type": "stat",
+      "title": "Container Health",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "container_last_seen{container_label_com_docker_compose_service=~\".*\"}",
+          "legendFormat": "{{container_label_com_docker_compose_service}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          }
+        }
+      },
+      "gridPos": {"h": 4, "w": 12, "x": 12, "y": 91}
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "type": "query",
+        "query": "label_values(container_cpu_usage_seconds_total, container_label_com_docker_compose_service)",
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "tooltip": {
+    "shared": true,
+    "sort": 0,
+    "value_type": "individual"
+  }
+} 
