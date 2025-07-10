@@ -617,18 +617,18 @@ show_help() {
     print_header "Unified ChatQnA Management Script Help"
     echo "Usage: $0 [OPTION]"
     echo ""
-    echo "Service Management:"
-    echo "  1) start-tgi       - Start TGI services"
-    echo "  2) start-vllm      - Start vLLM services"
-    echo "  3) stop-tgi        - Stop TGI services"
-    echo "  4) stop-vllm       - Stop vLLM services"
-    echo "  5) restart-tgi     - Restart TGI services"
-    echo "  6) restart-vllm    - Restart vLLM services"
-    echo ""
     echo "Environment Setup:"
-    echo "  7) setup-tgi       - Setup TGI environment variables"
-    echo "  8) setup-vllm      - Setup vLLM environment variables"
-    echo "  9) setup-light     - Setup lightweight environment"
+    echo "  1) setup-tgi       - Setup TGI environment variables"
+    echo "  2) setup-vllm      - Setup vLLM environment variables"
+    echo "  3) setup-light     - Setup lightweight environment"
+    echo ""
+    echo "Service Management:"
+    echo "  4) start-tgi       - Start TGI services"
+    echo "  5) start-vllm      - Start vLLM services"
+    echo "  6) stop-tgi        - Stop TGI services"
+    echo "  7) stop-vllm       - Stop vLLM services"
+    echo "  8) restart-tgi     - Restart TGI services"
+    echo "  9) restart-vllm    - Restart vLLM services"
     echo ""
     echo "Monitoring:"
     echo "  10) monitor-start  - Start monitoring stack"
@@ -651,8 +651,8 @@ show_help() {
     echo "  23) help           - Show this help"
     echo ""
     echo "Examples:"
+    echo "  $0 setup-tgi       # Setup TGI environment"
     echo "  $0 start-tgi       # Start TGI services"
-    echo "  $0 start-vllm      # Start vLLM services"
     echo "  $0 tgi-eval        # Run TGI evaluation"
     echo "  $0 vllm-eval       # Run vLLM evaluation"
     echo "  $0 compare-eval    # Compare TGI vs vLLM"
@@ -663,18 +663,18 @@ show_help() {
 show_menu() {
     while true; do
         print_header "Unified ChatQnA Management Menu"
-        echo "Service Management:"
-        echo "1.  Start TGI Services"
-        echo "2.  Start vLLM Services"
-        echo "3.  Stop TGI Services"
-        echo "4.  Stop vLLM Services"
-        echo "5.  Restart TGI Services"
-        echo "6.  Restart vLLM Services"
-        echo ""
         echo "Environment Setup:"
-        echo "7.  Setup TGI Environment"
-        echo "8.  Setup vLLM Environment"
-        echo "9.  Setup Lightweight Environment"
+        echo "1.  Setup TGI Environment"
+        echo "2.  Setup vLLM Environment"
+        echo "3.  Setup Lightweight Environment"
+        echo ""
+        echo "Service Management:"
+        echo "4.  Start TGI Services"
+        echo "5.  Start vLLM Services"
+        echo "6.  Stop TGI Services"
+        echo "7.  Stop vLLM Services"
+        echo "8.  Restart TGI Services"
+        echo "9.  Restart vLLM Services"
         echo ""
         echo "Monitoring:"
         echo "10. Start Monitoring"
@@ -699,15 +699,15 @@ show_menu() {
         read -p "Select an option (1-23): " choice
         
         case $choice in
-            1) start_tgi_services ;;
-            2) start_vllm_services ;;
-            3) stop_tgi_services ;;
-            4) stop_vllm_services ;;
-            5) restart_tgi_services ;;
-            6) restart_vllm_services ;;
-            7) setup_tgi_environment ;;
-            8) setup_vllm_environment ;;
-            9) setup_lightweight ;;
+            1) setup_tgi_environment ;;
+            2) setup_vllm_environment ;;
+            3) setup_lightweight ;;
+            4) start_tgi_services ;;
+            5) start_vllm_services ;;
+            6) stop_tgi_services ;;
+            7) stop_vllm_services ;;
+            8) restart_tgi_services ;;
+            9) restart_vllm_services ;;
             10) start_monitoring ;;
             11) stop_monitoring ;;
             12) run_quick_eval ;;
