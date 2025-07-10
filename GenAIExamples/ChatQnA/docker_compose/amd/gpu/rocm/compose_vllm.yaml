@@ -109,8 +109,6 @@ services:
       HF_HUB_ENABLE_HF_TRANSFER: 0
       WILM_USE_TRITON_FLASH_ATTENTION: 0
       PYTORCH_JIT: 0
-      WILM_USE_TRITON_FLASH_ATTENTION: 0
-      PYTORCH_JIT: 0
     volumes:
       - "${MODEL_CACHE:-./data}:/data"
     shm_size: 128G
