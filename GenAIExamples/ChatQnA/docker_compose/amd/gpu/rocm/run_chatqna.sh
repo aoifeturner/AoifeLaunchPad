@@ -543,6 +543,273 @@ except Exception as e:
     fi
 }
 
+# Function to run comprehensive TGI benchmark test
+run_tgi_benchmark() {
+    print_header "Running Comprehensive TGI Benchmark Test"
+    check_docker
+    
+    print_status "Setting up TGI benchmark environment..."
+    
+    # Check if TGI services are running
+    if ! docker ps --format "{{.Names}}" | grep -q "chatqna-tgi-service"; then
+        print_error "TGI services are not running. Please start them first with: $0 start-tgi"
+        exit 1
+    fi
+    
+    print_status "TGI services are running on:"
+    print_status "  Backend: http://localhost:8889"
+    print_status "  Retriever: http://localhost:7000"
+    print_status "  Frontend: http://localhost:5173"
+    
+    # Set up GenAIEval
+    cd $GENAIEVAL_DIR
+    
+    # Create virtual environment if it doesn't exist
+    if [ ! -d "opea_eval_env" ]; then
+        print_status "Creating virtual environment..."
+        python3 -m venv opea_eval_env
+    fi
+    
+    # Activate virtual environment
+    source opea_eval_env/bin/activate
+    
+    # Install dependencies
+    print_status "Installing GenAIEval dependencies..."
+    pip install -r requirements.txt
+    pip install -e .
+    
+    # Install additional dependencies for benchmark
+    print_status "Installing benchmark dependencies..."
+    pip install locust stresscli
+    
+    # Create results directory
+    mkdir -p $EVAL_RESULTS_DIR
+    
+    # Create benchmark configuration for TGI
+    print_status "Creating TGI benchmark configuration..."
+    create_tgi_benchmark_config
+    
+    # Run comprehensive benchmark
+    print_status "Starting comprehensive TGI benchmark (this will take 10-15 minutes)..."
+    cd evals/benchmark/
+    python benchmark.py --yaml benchmark_tgi.yaml --report
+    
+    print_status "TGI benchmark completed!"
+    print_status "Results saved to: $EVAL_RESULTS_DIR/tgi_benchmark_results/"
+    
+    # Show benchmark results
+    show_tgi_benchmark_results
+}
+
+# Function to run comprehensive vLLM benchmark test
+run_vllm_benchmark() {
+    print_header "Running Comprehensive vLLM Benchmark Test"
+    check_docker
+    
+    print_status "Setting up vLLM benchmark environment..."
+    
+    # Source vLLM environment variables
+    source set_env_vllm.sh
+    
+    # Check if vLLM services are running
+    if ! docker ps --format "{{.Names}}" | grep -q "chatqna-vllm-service"; then
+        print_error "vLLM services are not running. Please start them first with: $0 start-vllm"
+        exit 1
+    fi
+    
+    print_status "vLLM services are running on:"
+    print_status "  Backend: http://localhost:${CHATQNA_BACKEND_SERVICE_PORT:-8890}"
+    print_status "  Retriever: http://localhost:${CHATQNA_REDIS_RETRIEVER_PORT:-7001}"
+    print_status "  Frontend: http://localhost:${CHATQNA_FRONTEND_SERVICE_PORT:-5174}"
+    
+    # Set up GenAIEval
+    cd $GENAIEVAL_DIR
+    
+    # Create virtual environment if it doesn't exist
+    if [ ! -d "opea_eval_env" ]; then
+        print_status "Creating virtual environment..."
+        python3 -m venv opea_eval_env
+    fi
+    
+    # Activate virtual environment
+    source opea_eval_env/bin/activate
+    
+    # Install dependencies
+    print_status "Installing GenAIEval dependencies..."
+    pip install -r requirements.txt
+    pip install -e .
+    
+    # Install additional dependencies for benchmark
+    print_status "Installing benchmark dependencies..."
+    pip install locust stresscli
+    
+    # Create results directory
+    mkdir -p $EVAL_RESULTS_DIR
+    
+    # Create benchmark configuration for vLLM
+    print_status "Creating vLLM benchmark configuration..."
+    create_vllm_benchmark_config
+    
+    # Run comprehensive benchmark
+    print_status "Starting comprehensive vLLM benchmark (this will take 10-15 minutes)..."
+    cd evals/benchmark/
+    python benchmark.py --yaml benchmark_vllm.yaml --report
+    
+    print_status "vLLM benchmark completed!"
+    print_status "Results saved to: $EVAL_RESULTS_DIR/vllm_benchmark_results/"
+    
+    # Show benchmark results
+    show_vllm_benchmark_results
+}
+
+# Function to create TGI benchmark configuration
+create_tgi_benchmark_config() {
+    cd $GENAIEVAL_DIR/evals/benchmark/
+    
+    cat > benchmark_tgi.yaml << 'EOF'
+test_suite_config:
+  namespace: "default"
+  examples: ["chatqna"]
+  warm_ups: 10
+  user_queries: [50, 100, 200]
+  random_prompt: false
+  test_output_dir: "/home/yw/Desktop/OPEA/evaluation_results/tgi_benchmark_results"
+  run_time: null
+  collect_service_metric: true
+  llm_model: "Qwen/Qwen2.5-7B-Instruct-1M"
+  deployment_type: "docker"
+  service_ip: "localhost"
+  service_port: 8889
+  load_shape:
+    name: "constant"
+    params:
+      constant:
+        concurrent_level: 5
+  query_timeout: 120
+  seed: 42
+
+test_cases:
+  chatqna:
+    e2e:
+      service_name: "chatqna-tgi"
+      run_test: true
+      service_list: ["chatqna-tgi-service"]
+      dataset: "default"
+      prompts: null
+      max_output: 512
+      max_new_tokens: 512
+      stream: true
+      summary_type: "stuff"
+      k: 5
+      top_n: 3
+      chat_template: "qwen"
+EOF
+}
+
+# Function to create vLLM benchmark configuration
+create_vllm_benchmark_config() {
+    cd $GENAIEVAL_DIR/evals/benchmark/
+    
+    cat > benchmark_vllm.yaml << 'EOF'
+test_suite_config:
+  namespace: "default"
+  examples: ["chatqna"]
+  warm_ups: 10
+  user_queries: [50, 100, 200]
+  random_prompt: false
+  test_output_dir: "/home/yw/Desktop/OPEA/evaluation_results/vllm_benchmark_results"
+  run_time: null
+  collect_service_metric: true
+  llm_model: "Qwen/Qwen2.5-7B-Instruct-1M"
+  deployment_type: "docker"
+  service_ip: "localhost"
+  service_port: 8890
+  load_shape:
+    name: "constant"
+    params:
+      constant:
+        concurrent_level: 5
+  query_timeout: 120
+  seed: 42
+
+test_cases:
+  chatqna:
+    e2e:
+      service_name: "chatqna-vllm"
+      run_test: true
+      service_list: ["chatqna-vllm-service"]
+      dataset: "default"
+      prompts: null
+      max_output: 512
+      max_new_tokens: 512
+      stream: true
+      summary_type: "stuff"
+      k: 5
+      top_n: 3
+      chat_template: "qwen"
+EOF
+}
+
+# Function to show TGI benchmark results
+show_tgi_benchmark_results() {
+    print_status "TGI Benchmark Results Summary:"
+    echo "===================================="
+    
+    local results_dir="$EVAL_RESULTS_DIR/tgi_benchmark_results"
+    if [ -d "$results_dir" ]; then
+        print_status "Benchmark results directory: $results_dir"
+        print_status "Check the following files for detailed results:"
+        ls -la "$results_dir" 2>/dev/null || print_warning "Results directory not found"
+        
+        # Try to find and display summary
+        find "$results_dir" -name "*.json" -type f | head -1 | while read -r file; do
+            print_status "Sample results from: $file"
+            python3 -c "
+import json
+try:
+    with open('$file', 'r') as f:
+        data = json.load(f)
+    print('  📊 Benchmark completed successfully')
+    print(f'  📁 Results location: $results_dir')
+except Exception as e:
+    print('  ❌ Error reading benchmark results')
+"
+        done
+    else
+        print_warning "Benchmark results directory not found"
+    fi
+}
+
+# Function to show vLLM benchmark results
+show_vllm_benchmark_results() {
+    print_status "vLLM Benchmark Results Summary:"
+    echo "====================================="
+    
+    local results_dir="$EVAL_RESULTS_DIR/vllm_benchmark_results"
+    if [ -d "$results_dir" ]; then
+        print_status "Benchmark results directory: $results_dir"
+        print_status "Check the following files for detailed results:"
+        ls -la "$results_dir" 2>/dev/null || print_warning "Results directory not found"
+        
+        # Try to find and display summary
+        find "$results_dir" -name "*.json" -type f | head -1 | while read -r file; do
+            print_status "Sample results from: $file"
+            python3 -c "
+import json
+try:
+    with open('$file', 'r') as f:
+        data = json.load(f)
+    print('  📊 Benchmark completed successfully')
+    print(f'  📁 Results location: $results_dir')
+except Exception as e:
+    print('  ❌ Error reading benchmark results')
+"
+        done
+    else
+        print_warning "Benchmark results directory not found"
+    fi
+}
+
 # Function to show TGI service logs
 show_tgi_logs() {
     print_header "Showing TGI Service Logs"
@@ -640,6 +907,8 @@ show_help() {
     echo "  14) tgi-eval       - TGI-specific evaluation (port 8889)"
     echo "  15) vllm-eval      - vLLM-specific evaluation (port 8890)"
     echo "  16) compare-eval   - Compare TGI vs vLLM performance"
+    echo "  17) tgi-benchmark  - Comprehensive TGI benchmark (Locust load testing)"
+    echo "  18) vllm-benchmark - Comprehensive vLLM benchmark (Locust load testing)"
     echo ""
     echo "Logs and Status:"
     echo "  17) logs-tgi       - Show TGI service logs"
@@ -656,6 +925,8 @@ show_help() {
     echo "  $0 tgi-eval        # Run TGI evaluation"
     echo "  $0 vllm-eval       # Run vLLM evaluation"
     echo "  $0 compare-eval    # Compare TGI vs vLLM"
+    echo "  $0 tgi-benchmark   # Run comprehensive TGI benchmark"
+    echo "  $0 vllm-benchmark  # Run comprehensive vLLM benchmark"
     echo "  $0 menu            # Interactive menu"
 }
 
@@ -686,17 +957,19 @@ show_menu() {
         echo "14. TGI Evaluation (Port 8889)"
         echo "15. vLLM Evaluation (Port 8890)"
         echo "16. Comparison Evaluation (TGI vs vLLM)"
+        echo "17. TGI Comprehensive Benchmark (Load Testing)"
+        echo "18. vLLM Comprehensive Benchmark (Load Testing)"
         echo ""
         echo "Logs and Status:"
-        echo "17. Show TGI Logs"
-        echo "18. Show vLLM Logs"
-        echo "19. Show Monitoring Logs"
-        echo "20. Check Service Status"
-        echo "21. Cleanup All Services"
-        echo "22. Help"
-        echo "23. Exit"
+        echo "19. Show TGI Logs"
+        echo "20. Show vLLM Logs"
+        echo "21. Show Monitoring Logs"
+        echo "22. Check Service Status"
+        echo "23. Cleanup All Services"
+        echo "24. Help"
+        echo "25. Exit"
         echo ""
-        read -p "Select an option (1-23): " choice
+        read -p "Select an option (1-25): " choice
         
         case $choice in
             1) setup_tgi_environment ;;
@@ -715,13 +988,15 @@ show_menu() {
             14) run_tgi_eval ;;
             15) run_vllm_eval ;;
             16) run_comparison_eval ;;
-            17) show_tgi_logs ;;
-            18) show_vllm_logs ;;
-            19) show_monitoring_logs ;;
-            20) check_status ;;
-            21) cleanup ;;
-            22) show_help ;;
-            23) print_status "Goodbye!"; exit 0 ;;
+            17) run_tgi_benchmark ;;
+            18) run_vllm_benchmark ;;
+            19) show_tgi_logs ;;
+            20) show_vllm_logs ;;
+            21) show_monitoring_logs ;;
+            22) check_status ;;
+            23) cleanup ;;
+            24) show_help ;;
+            25) print_status "Goodbye!"; exit 0 ;;
             *) print_error "Invalid option. Please try again." ;;
         esac
         
@@ -769,6 +1044,8 @@ main() {
         "tgi-eval") run_tgi_eval ;;
         "vllm-eval") run_vllm_eval ;;
         "compare-eval") run_comparison_eval ;;
+        "tgi-benchmark") run_tgi_benchmark ;;
+        "vllm-benchmark") run_vllm_benchmark ;;
         
         # Logs and Status
         "logs-tgi") show_tgi_logs ;;

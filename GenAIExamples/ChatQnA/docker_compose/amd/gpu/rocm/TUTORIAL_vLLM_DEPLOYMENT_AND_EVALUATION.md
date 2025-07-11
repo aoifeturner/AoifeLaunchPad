@@ -169,6 +169,12 @@ source set_env_vllm.sh
 
 # Check service status
 ./run_chatqna.sh status
+
+# Check chatqna-vllm-service status
+docker logs -f chatqna-vllm-service
+
+![check vllm service status output](img/check_vllm_status.png)
+
 ```
 
 #### Option B: Manual Deployment
@@ -190,26 +196,53 @@ Check that all services are running:
 # Check running containers
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 
+![check running container status](img/check running containers.png)
+
 # Test backend API
 curl -X POST http://localhost:8890/v1/chatqna \
   -H "Content-Type: application/json" \
   -d '{"messages": "Hello, how are you?"}'
 
+![Test backend API](img/test_backend_api.png)
+
 # Access the web interface
-# Open browser: http://localhost:8081
+# Open browser: http://replace_with_your_public_IP:5174
+```
+You can find your public IP on the droplet information page, or you can use this command
+```bash
+hostname -I | awk '{print $1}'
 ```
 
 ### Step 5: Upload Documents
 
 Upload documents for the RAG system:
 ```bash
-# Test document upload
+# Create a text file
+echo "Your document content here" > document.txt
+
+# Upload the file
 curl -X POST http://localhost:18104/v1/dataprep/ingest \
+  -H "Content-Type: multipart/form-data" \
+  -F "files=@document.txt"
+
+# Verify the upload worked
+# Check if the document was indexed
+curl -X POST http://localhost:18104/v1/dataprep/get \
   -H "Content-Type: application/json" \
-  -d '{
-    "file_name": "test_document.txt",
-    "content": "This is a test document for the ChatQnA system."
-  }'
+  -d '{"index_name": "rag-redis"}'
+
+# For multiple documents
+# Create multiple files
+echo "Document 1 content" > doc1.txt
+echo "Document 2 content" > doc2.txt
+
+# Upload multiple files
+curl -X POST http://localhost:18104/v1/dataprep/ingest \
+  -H "Content-Type: multipart/form-data" \
+  -F "files=@doc1.txt" \
+  -F "files=@doc2.txt"
+
+![Upload file succeeded](img/upload_file.png)
 ```
 
 ## Performance Evaluation
@@ -225,8 +258,17 @@ Performance evaluation helps you understand:
 ### Step 1: Setup Evaluation Environment
 
 ```bash
+# Pull from OPEA GitHub so GenAIExamples and GenAIEval are in the same directory
+git clone https://github.com/opea-project/GenAIEval.git
+
 # Navigate to evaluation directory
-cd /home/yw/Desktop/OPEA/GenAIEval
+cd /path/to/GenAIEval
+
+# Copy chatqna scripts from the LaunchPad directory
+cp /path/to/LaunchPad/GenAIEval/evals/benchmark/* /path/to/GenAIEval/evals/benchmark/
+
+# Install dependency
+apt install python3.12-venv
 
 # Create virtual environment
 python3 -m venv opea_eval_env
@@ -241,29 +283,25 @@ pip install -e .
 
 #### Using the Automated Script
 ```bash
+# Navigate back to GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm/
+cd /path/to/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm/
+
 # Run vLLM evaluation
 ./run_chatqna.sh vllm-eval
 
-# Run comparison between TGI and vLLM
-./run_chatqna.sh compare-eval
-```
-
-#### Manual Evaluation
-```bash
-# Activate evaluation environment
-source opea_eval_env/bin/activate
-
-# Run evaluation
-python -m genaieval.evaluators.chatqna_evaluator \
-  --backend_url http://localhost:8890/v1/chatqna \
-  --eval_dataset path/to/evaluation/dataset \
-  --output_dir /path/to/results
+![Evaluation output](img/eval_output.png)
 ```
 
 ### Step 3: Performance Metrics
 
 #### Throughput Testing
 ```bash
+# Install dependency
+apt install apache2-utils
+
+# Create a complex test file
+echo "{"messages": "Can you provide a detailed explanation of how neural networks work, including the concepts of forward propagation, backpropagation, and gradient descent? Also explain how these concepts relate to deep learning and why they are important for modern AI systems."}" > test_data.json
+
 # Test concurrent requests
 ab -n 100 -c 10 -p test_data.json -T application/json \
   http://localhost:8890/v1/chatqna
@@ -271,33 +309,26 @@ ab -n 100 -c 10 -p test_data.json -T application/json \
 
 #### Latency Testing
 ```bash
+# Create curl-format.txt with the following content:
+     time_namelookup:  %{time_namelookup}\n
+        time_connect:  %{time_connect}\n
+     time_appconnect:  %{time_appconnect}\n
+    time_pretransfer:  %{time_pretransfer}\n
+       time_redirect:  %{time_redirect}\n
+  time_starttransfer:  %{time_starttransfer}\n
+                     ----------\n
+          time_total:  %{time_total}\n
+          http_code:  %{http_code}\n
+       size_download:  %{size_download}\n
+      speed_download:  %{speed_download}\n
+
 # Measure response times
 curl -w "@curl-format.txt" -X POST http://localhost:8890/v1/chatqna \
   -H "Content-Type: application/json" \
   -d '{"messages": "What is machine learning?"}'
 ```
 
-### Step 4: Resource Monitoring
-
-#### GPU Monitoring
-```bash
-# Monitor GPU usage
-watch -n 1 'rocm-smi'
-
-# Monitor GPU memory
-rocm-smi --showproductname --showmeminfo
-```
-
-#### System Monitoring
-```bash
-# Monitor system resources
-htop
-
-# Monitor Docker containers
-docker stats
-```
-
-### Step 5: Evaluation Results
+### Step 4: Evaluation Results
 
 Evaluation results include:
 - **Response Time**: Average, median, 95th percentile
@@ -320,11 +351,70 @@ docker compose -f compose_vllm.yaml logs -f chatqna-vllm-service
 
 #### Monitor Performance
 ```bash
+# Copy prometheus.yml from LaunchPad directory
+cp /path/to/LaunchPad/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm/grafana/prometheus.yml /path/to/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm/grafana/
+
 # Start monitoring stack
 ./run_chatqna.sh monitor-start
 
+![Start monitoring](img/start-monitoring.png)
+
 # Access Grafana dashboard
 # Open browser: http://localhost:3000 (admin/admin)
+
+# Copy the grafana files from LaunchPad to GenAIExample directory
+cp -r /path/to/LaunchPad/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm/grafana/* /path/to/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm/grafana/
+```
+## Data Source Import
+
+### Prometheus Data Source
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Basic YWRtaW46YWRtaW4=" \
+  -d '{
+    "name": "Prometheus",
+    "type": "prometheus",
+    "url": "http://prometheus:9090",
+    "access": "proxy",
+    "isDefault": true
+  }' \
+  http://localhost:3000/api/datasources
+```
+
+## Dashboard Imports
+
+### 1. Comprehensive Dashboard (TGI + vLLM) - Fixed
+**Use this for remote nodes with both TGI and vLLM services**
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Basic YWRtaW46YWRtaW4=" \
+  -d @grafana/dashboards/chatqna_comprehensive_dashboard_vllm_fixed_import.json \
+  http://localhost:3000/api/dashboards/import
+```
+
+### 2. AI Model Performance Dashboard
+**Use this for detailed model-specific monitoring and performance analysis**
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Basic YWRtaW46YWRtaW4=" \
+  -d @grafana/dashboards/chatqna_ai_model_dashboard_import.json \
+  http://localhost:3000/api/dashboards/import
+```
+
+### 3. TGI-Only Dashboard (Local Development)
+**Use this for local development where vLLM is not available**
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Basic YWRtaW46YWRtaW4=" \
+  -d @grafana/dashboards/chatqna_tgi_only_dashboard_import.json \
+  http://localhost:3000/api/dashboards/import
 ```
 
 ### Common Issues and Solutions
