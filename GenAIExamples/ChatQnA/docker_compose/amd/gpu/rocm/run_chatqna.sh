@@ -672,7 +672,7 @@ test_suite_config:
   warm_ups: 10
   user_queries: [50, 100, 200]
   random_prompt: false
-  test_output_dir: "/home/yw/Desktop/OPEA/evaluation_results/tgi_benchmark_results"
+  test_output_dir: "/root/evaluation_results/tgi_benchmark_results"
   run_time: null
   collect_service_metric: true
   llm_model: "Qwen/Qwen2.5-14B-Instruct"
@@ -717,7 +717,7 @@ test_suite_config:
   warm_ups: 10
   user_queries: [50, 100, 200]
   random_prompt: false
-  test_output_dir: "/home/yw/Desktop/OPEA/evaluation_results/vllm_benchmark_results"
+  test_output_dir: "/root/evaluation_results/vllm_benchmark_results"
   run_time: null
   collect_service_metric: true
   llm_model: "Qwen/Qwen2.5-14B-Instruct"
