@@ -664,6 +664,7 @@ run_vllm_benchmark() {
 create_tgi_benchmark_config() {
     cd $GENAIEVAL_DIR/evals/benchmark/
     
+    # Create the benchmark configuration file
     cat > benchmark_tgi.yaml << 'EOF'
 test_suite_config:
   namespace: "default"
@@ -708,6 +709,7 @@ EOF
 create_vllm_benchmark_config() {
     cd $GENAIEVAL_DIR/evals/benchmark/
     
+    # Create the benchmark configuration file
     cat > benchmark_vllm.yaml << 'EOF'
 test_suite_config:
   namespace: "default"
