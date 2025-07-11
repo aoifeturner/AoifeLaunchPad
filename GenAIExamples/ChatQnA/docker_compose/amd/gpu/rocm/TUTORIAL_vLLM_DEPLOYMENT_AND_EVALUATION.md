@@ -490,33 +490,6 @@ export CHATQNA_EMBEDDING_MODEL_ID="BAAI/bge-large-en-v1.5"
 export CHATQNA_RERANK_MODEL_ID="BAAI/bge-reranker-large"
 ```
 
-### vLLM Optimization
-
-Modify vLLM service configuration in `compose_vllm.yaml`:
-
-```yaml
-command: >
-  --model ${CHATQNA_LLM_MODEL_ID}
-  --swap-space 32
-  --disable-log-requests
-  --dtype float16
-  --tensor-parallel-size 2
-  --host 0.0.0.0
-  --port 8011
-  --max-model-len 8192
-  --gpu-memory-utilization 0.9
-```
-
-### Network Configuration
-
-For remote access, configure firewall:
-```bash
-# Allow required ports
-sudo ufw allow 8081/tcp  # Nginx
-sudo ufw allow 8890/tcp  # Backend API
-sudo ufw allow 18009/tcp # vLLM API
-```
-
 ## Troubleshooting
 
 ### Diagnostic Commands
