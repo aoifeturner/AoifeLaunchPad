@@ -373,6 +373,8 @@ cp /path/to/LaunchPad/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm/grafana/
 
 # Copy the grafana files from LaunchPad to GenAIExample directory
 cp -r /path/to/LaunchPad/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm/grafana/* /path/to/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm/grafana/
+
+![An example of metrix exported to Grafana](img/metrix_grafana.png)
 ```
 ## Data Source Import
 
@@ -586,4 +588,4 @@ For additional support or advanced configurations, refer to the project document
 
 ---
 
-**Note**: This tutorial assumes you have the necessary permissions and that all required software is installed. For production deployments, consider additional security measures and monitoring solutions. 
+a*Note**: This tutorial assumes you have the necessary permissions and that all required software is installed. For production deployments, consider additional security measures and monitoring solutions. 
