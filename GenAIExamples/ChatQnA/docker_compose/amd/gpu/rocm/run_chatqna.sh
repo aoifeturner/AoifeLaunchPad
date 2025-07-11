@@ -580,7 +580,7 @@ run_tgi_benchmark() {
     
     # Install additional dependencies for benchmark
     print_status "Installing benchmark dependencies..."
-    pip install locust stresscli
+    pip install locust
     
     # Create results directory
     mkdir -p $EVAL_RESULTS_DIR
@@ -641,7 +641,7 @@ run_vllm_benchmark() {
     
     # Install additional dependencies for benchmark
     print_status "Installing benchmark dependencies..."
-    pip install locust stresscli
+    pip install locust
     
     # Create results directory
     mkdir -p $EVAL_RESULTS_DIR

@@ -289,6 +289,9 @@ cd /path/to/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm/
 # Run vLLM evaluation
 ./run_chatqna.sh vllm-eval
 
+# Run vLLM full benchmark
+./run_chatqna.sh vllm-benchmark
+
 ![Evaluation output](img/eval_output.png)
 ```
 
