@@ -122,18 +122,24 @@ The following is the complete system architecture diagram.
 
 ### Step 1: Pull source code from GitHub 
 
-OPEA:
+Open Platform for Enterprise AI (OPEA):
 ```bash
 git clone https://github.com/opea-project/GenAIExamples.git
 ```
-One click deployment scripts for OPEA on ROCm:
+One click deployment scripts for the use case:
 ```bash
-git clone git@github.com:Yu-amd/LaunchPad.git
+git clone https://github.com/Yu-amd/LaunchPad.git
+```
+
+The LaunchPad project uses the same hierarchy as OPEA project. You need to copy the scripts and yaml files from the directory: LaunchPad/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm/ to the corresponding directory in OPEA folder:
+```bash
+# Copy necessary scrips and configuration files to the OPEA directory
+cp *.sh *.yaml /path/to/OPEA/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm/
 ```
 
 ### Step 2: Environment Setup
 
-Navigate to the deployment directory:
+Navigate to the OPEA deployment directory:
 ```bash
 cd /path/to/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm
 ```
@@ -154,8 +160,12 @@ source set_env_vllm.sh
 # Setup vLLM environment
 ./run_chatqna.sh setup-vllm
 
+![set_env_vllm.sh output](img/set_env_vllm_output.png)
+
 # Start vLLM services
 ./run_chatqna.sh start-vllm
+
+![start vllm service output](img/start-vllm_output.png)
 
 # Check service status
 ./run_chatqna.sh status
