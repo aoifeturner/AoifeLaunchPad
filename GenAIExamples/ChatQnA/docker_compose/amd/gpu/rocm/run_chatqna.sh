@@ -591,8 +591,7 @@ run_tgi_benchmark() {
     
     # Run comprehensive benchmark
     print_status "Starting comprehensive TGI benchmark (this will take 10-15 minutes)..."
-    cd evals/benchmark/
-    python benchmark.py --yaml benchmark_tgi.yaml --report
+    python $GENAIEVAL_DIR/evals/benchmark/benchmark.py --yaml $GENAIEVAL_DIR/evals/benchmark/benchmark_tgi.yaml --report
     
     print_status "TGI benchmark completed!"
     print_status "Results saved to: $EVAL_RESULTS_DIR/tgi_benchmark_results/"
@@ -652,8 +651,7 @@ run_vllm_benchmark() {
     
     # Run comprehensive benchmark
     print_status "Starting comprehensive vLLM benchmark (this will take 10-15 minutes)..."
-    cd evals/benchmark/
-    python benchmark.py --yaml benchmark_vllm.yaml --report
+    python $GENAIEVAL_DIR/evals/benchmark/benchmark.py --yaml $GENAIEVAL_DIR/evals/benchmark/benchmark_vllm.yaml --report
     
     print_status "vLLM benchmark completed!"
     print_status "Results saved to: $EVAL_RESULTS_DIR/vllm_benchmark_results/"
