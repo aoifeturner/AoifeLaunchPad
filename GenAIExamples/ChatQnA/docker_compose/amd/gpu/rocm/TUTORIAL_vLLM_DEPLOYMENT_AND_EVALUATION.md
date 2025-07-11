@@ -289,6 +289,9 @@ cd /path/to/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm/
 # Run vLLM evaluation
 ./run_chatqna.sh vllm-eval
 
+# Replace gated model from aistress.py
+cp /path/to/LaunchPad/GenAIEval/evals/benchmark/stresscli/locust/aistress.py /path/to/GenAIEval/evals/benchmark/stresscli/locust/
+
 # Run vLLM full benchmark
 ./run_chatqna.sh vllm-benchmark
 
