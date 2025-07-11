@@ -674,7 +674,7 @@ test_suite_config:
   test_output_dir: "/home/yw/Desktop/OPEA/evaluation_results/tgi_benchmark_results"
   run_time: null
   collect_service_metric: true
-  llm_model: "Qwen/Qwen2.5-7B-Instruct-1M"
+  llm_model: "Qwen/Qwen2.5-14B-Instruct"
   deployment_type: "docker"
   service_ip: "localhost"
   service_port: 8889
@@ -718,7 +718,7 @@ test_suite_config:
   test_output_dir: "/home/yw/Desktop/OPEA/evaluation_results/vllm_benchmark_results"
   run_time: null
   collect_service_metric: true
-  llm_model: "Qwen/Qwen2.5-7B-Instruct-1M"
+  llm_model: "Qwen/Qwen2.5-14B-Instruct"
   deployment_type: "docker"
   service_ip: "localhost"
   service_port: 8890
