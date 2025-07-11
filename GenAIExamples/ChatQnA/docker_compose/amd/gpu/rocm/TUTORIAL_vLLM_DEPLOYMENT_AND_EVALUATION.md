@@ -292,10 +292,13 @@ cd /path/to/GenAIExamples/ChatQnA/docker_compose/amd/gpu/rocm/
 # Replace gated model from aistress.py
 cp /path/to/LaunchPad/GenAIEval/evals/benchmark/stresscli/locust/aistress.py /path/to/GenAIEval/evals/benchmark/stresscli/locust/
 
+# Check for existing processes
+ps aux | grep -E "(locust|benchmark)" | grep -v grep
+# Kill existing processes if found
+pkill -f locust
+pkill -f benchmark
 # Run vLLM full benchmark
 ./run_chatqna.sh vllm-benchmark
-
-![Evaluation output](img/eval_output.png)
 ```
 
 ### Step 3: Performance Metrics
