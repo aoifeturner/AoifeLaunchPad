@@ -97,6 +97,56 @@ docker-compose up -d
 sleep 30
 ```
 
+### GPU Memory Management
+
+Before proceeding to the next steps, it's important to ensure your GPU memory is properly managed. AMD GPUs with ROCm can sometimes retain memory from previous operations, which may cause deployment issues.
+
+#### Check GPU Memory Status
+```bash
+# Check current GPU memory usage
+rocm-smi
+
+# Expected output shows VRAM% and GPU% usage
+# If VRAM% is high (>80%) but GPU% is low, memory may be fragmented
+```
+
+#### Clear GPU Memory (If Needed)
+
+If you encounter GPU memory issues or high VRAM usage with low GPU utilization:
+
+**Option 1: Kill GPU Processes**
+```bash
+# Find processes using GPU
+sudo fuser -v /dev/kfd
+
+# Kill GPU-related processes
+sudo pkill -f "python|vllm|docker"
+```
+
+**Option 2: Restart GPU Services**
+```bash
+# Restart AMD GPU services
+sudo systemctl restart amdgpu
+sudo systemctl restart kfd
+```
+
+**Option 3: System Reboot (Most Reliable)**
+```bash
+# If other methods don't work, reboot the system
+sudo reboot
+
+# Note: If you're on a remote server, wait approximately 30 seconds to 1 minute
+# before attempting to SSH back into the server
+```
+
+After clearing GPU memory, verify it's free:
+```bash
+# Check GPU memory is now available
+rocm-smi
+
+# Expected: VRAM% should be low (<20%) and GPU% should be 0%
+```
+
 ### 6. Fix Redis Index (Critical for Remote Nodes)
 
 Newer Docker images have stricter error handling and require the Redis index to exist:
