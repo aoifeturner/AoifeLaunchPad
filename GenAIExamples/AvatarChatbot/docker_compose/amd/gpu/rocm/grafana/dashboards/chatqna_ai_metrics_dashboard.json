@@ -1,0 +1,317 @@
+{
+  "id": null,
+  "title": "ChatQnA AI/LLM Metrics",
+  "tags": ["chatqna", "ai", "llm", "tgi", "tei", "metrics"],
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    {
+      "type": "row",
+      "title": "TGI (Text Generation Inference) Metrics",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "TGI Request Rate",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "rate(tgi_request_count[1m])",
+        "legendFormat": "Requests/s"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 1}
+    },
+    {
+      "type": "timeseries",
+      "title": "TGI Success Rate",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "rate(tgi_request_success[1m])",
+        "legendFormat": "Success/s"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 1}
+    },
+    {
+      "type": "timeseries",
+      "title": "TGI Error Rate",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "rate(tgi_request_count[1m]) - rate(tgi_request_success[1m])",
+        "legendFormat": "Errors/s"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 1}
+    },
+    {
+      "type": "timeseries",
+      "title": "TGI Prefill Operations",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "rate(tgi_batch_inference_count{method=\"prefill\"}[1m])",
+        "legendFormat": "Prefill/s"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 7}
+    },
+    {
+      "type": "timeseries",
+      "title": "TGI Decode Operations",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "rate(tgi_batch_inference_count{method=\"decode\"}[1m])",
+        "legendFormat": "Decode/s"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 7}
+    },
+    {
+      "type": "timeseries",
+      "title": "TGI Batch Concat (Backpressure)",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "rate(tgi_batch_concat{reason=\"backpressure\"}[1m])",
+        "legendFormat": "Backpressure Events/s"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 7}
+    },
+    {
+      "type": "row",
+      "title": "TEI (Text Embeddings Inference) Metrics",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 13},
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "TEI Embedding Request Rate",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "rate(te_request_count{method=\"single\"}[1m])",
+        "legendFormat": "Embedding Requests/s"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 14}
+    },
+    {
+      "type": "timeseries",
+      "title": "TEI Embedding Success Rate",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "rate(te_embed_success[1m])",
+        "legendFormat": "Embedding Success/s"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 14}
+    },
+    {
+      "type": "timeseries",
+      "title": "TEI Embedding Duration (95th percentile)",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "histogram_quantile(0.95, rate(te_embed_duration_bucket[5m]))",
+        "legendFormat": "95th percentile"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 14}
+    },
+    {
+      "type": "timeseries",
+      "title": "TEI Queue Size",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "te_queue_size",
+        "legendFormat": "Queue Size"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 20}
+    },
+    {
+      "type": "row",
+      "title": "Retrieval & Reranking Metrics",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 26},
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "Retriever Request Rate",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "rate(http_requests_total{handler=\"/v1/retrieval\"}[1m])",
+        "legendFormat": "Retrieval Requests/s"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 27}
+    },
+    {
+      "type": "timeseries",
+      "title": "Retriever Response Time",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{handler=\"/v1/retrieval\"}[5m]))",
+        "legendFormat": "95th percentile"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 27}
+    },
+    {
+      "type": "timeseries",
+      "title": "Retriever Success Rate",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "rate(http_requests_total{handler=\"/v1/retrieval\", status=~\"2..\"}[1m])",
+        "legendFormat": "Success Rate"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 27}
+    },
+    {
+      "type": "row",
+      "title": "Resource Utilization",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 33},
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "TGI CPU Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=\"chatqna-tgi-service\"}[1m])) * 100",
+        "legendFormat": "TGI CPU %"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 34}
+    },
+    {
+      "type": "timeseries",
+      "title": "TGI Memory Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "container_memory_usage_bytes{container_label_com_docker_compose_service=\"chatqna-tgi-service\"} / 1024 / 1024",
+        "legendFormat": "TGI Memory MB"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 34}
+    },
+    {
+      "type": "timeseries",
+      "title": "TEI CPU Usage",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=\"chatqna-tei-embedding-service\"}[1m])) * 100",
+          "legendFormat": "TEI Embedding CPU %"
+        },
+        {
+          "expr": "sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=\"chatqna-tei-reranking-service\"}[1m])) * 100",
+          "legendFormat": "TEI Reranking CPU %"
+        }
+      ],
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 34}
+    },
+    {
+      "type": "timeseries",
+      "title": "TEI Memory Usage",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "container_memory_usage_bytes{container_label_com_docker_compose_service=\"chatqna-tei-embedding-service\"} / 1024 / 1024",
+          "legendFormat": "TEI Embedding Memory MB"
+        },
+        {
+          "expr": "container_memory_usage_bytes{container_label_com_docker_compose_service=\"chatqna-tei-reranking-service\"} / 1024 / 1024",
+          "legendFormat": "TEI Reranking Memory MB"
+        }
+      ],
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 40}
+    },
+    {
+      "type": "timeseries",
+      "title": "Retriever CPU Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=\"chatqna-retriever\"}[1m])) * 100",
+        "legendFormat": "Retriever CPU %"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 40}
+    },
+    {
+      "type": "timeseries",
+      "title": "Retriever Memory Usage",
+      "datasource": "Prometheus",
+      "targets": [{
+        "expr": "container_memory_usage_bytes{container_label_com_docker_compose_service=\"chatqna-retriever\"} / 1024 / 1024",
+        "legendFormat": "Retriever Memory MB"
+      }],
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 40}
+    },
+    {
+      "type": "row",
+      "title": "AI Service Health",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 46},
+      "collapsed": false
+    },
+    {
+      "type": "stat",
+      "title": "AI Services Health Status",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "up{job=\"tgi-service\"}",
+          "legendFormat": "TGI Service"
+        },
+        {
+          "expr": "up{job=\"tei-embedding\"}",
+          "legendFormat": "TEI Embedding"
+        },
+        {
+          "expr": "up{job=\"tei-reranking\"}",
+          "legendFormat": "TEI Reranking"
+        },
+        {
+          "expr": "up{job=\"retriever-tgi\"}",
+          "legendFormat": "Retriever"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          }
+        }
+      },
+      "gridPos": {"h": 4, "w": 12, "x": 0, "y": 47}
+    },
+    {
+      "type": "stat",
+      "title": "Request Success Rates",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(tgi_request_success[5m]) / rate(tgi_request_count[5m]) * 100",
+          "legendFormat": "TGI Success %"
+        },
+        {
+          "expr": "rate(te_embed_success[5m]) / rate(te_request_count{method=\"single\"}[5m]) * 100",
+          "legendFormat": "TEI Success %"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "yellow", "value": 95},
+              {"color": "green", "value": 99}
+            ]
+          }
+        }
+      },
+      "gridPos": {"h": 4, "w": 12, "x": 12, "y": 47}
+    }
+  ],
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "tooltip": {
+    "shared": true,
+    "sort": 0,
+    "value_type": "individual"
+  }
+} 

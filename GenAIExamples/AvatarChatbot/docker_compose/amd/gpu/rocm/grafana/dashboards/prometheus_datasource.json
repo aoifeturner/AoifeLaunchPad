@@ -1,0 +1,12 @@
+{
+  "name": "Prometheus",
+  "type": "prometheus",
+  "url": "http://prometheus:9090",
+  "access": "proxy",
+  "isDefault": true,
+  "jsonData": {
+    "timeout": 60,
+    "queryTimeout": "60s",
+    "httpMethod": "POST"
+  }
+} 
