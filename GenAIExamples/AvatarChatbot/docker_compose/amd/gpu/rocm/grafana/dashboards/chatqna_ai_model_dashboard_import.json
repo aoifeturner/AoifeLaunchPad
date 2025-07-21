@@ -1,0 +1,496 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "ChatQnA AI Model Performance Dashboard",
+    "tags": ["chatqna", "ai", "model", "performance", "tokens", "latency"],
+    "timezone": "browser",
+    "schemaVersion": 36,
+    "version": 1,
+    "refresh": "10s",
+    "panels": [
+      {
+        "type": "row",
+        "title": "Model Overview",
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
+        "collapsed": false
+      },
+      {
+        "type": "stat",
+        "title": "Model Status",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "up{job=\"tgi-service\"}",
+            "legendFormat": "TGI Model"
+          },
+          {
+            "expr": "up{job=\"vllm-service\"}",
+            "legendFormat": "vLLM Model"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "green", "value": 1}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 4, "w": 8, "x": 0, "y": 1}
+      },
+      {
+        "type": "stat",
+        "title": "Active Models",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "count(vllm:iteration_tokens_total_sum) by (model_name)",
+            "legendFormat": "vLLM Models"
+          },
+          {
+            "expr": "count(tgi_request_count) by (model)",
+            "legendFormat": "TGI Models"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "green", "value": 1}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 4, "w": 8, "x": 8, "y": 1}
+      },
+      {
+        "type": "stat",
+        "title": "Model Response Times",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"tgi-service\"}[5m]))",
+            "legendFormat": "TGI 95th %"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(vllm:e2e_request_latency_seconds_bucket[5m]))",
+            "legendFormat": "vLLM 95th %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 2},
+                {"color": "red", "value": 5}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 4, "w": 8, "x": 16, "y": 1}
+      },
+      {
+        "type": "row",
+        "title": "vLLM Model Performance",
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 5},
+        "collapsed": false
+      },
+      {
+        "type": "timeseries",
+        "title": "vLLM Token Generation Rate by Model",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(vllm:iteration_tokens_total_sum[1m])",
+            "legendFormat": "{{model_name}} - Tokens/s"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 6}
+      },
+      {
+        "type": "timeseries",
+        "title": "vLLM Request Rate by Model",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"vllm-service\"}[1m])",
+            "legendFormat": "vLLM Requests/s"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 6}
+      },
+      {
+        "type": "timeseries",
+        "title": "vLLM Response Time by Model",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(vllm:e2e_request_latency_seconds_bucket[5m]))",
+            "legendFormat": "50th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(vllm:e2e_request_latency_seconds_bucket[5m]))",
+            "legendFormat": "95th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(vllm:e2e_request_latency_seconds_bucket[5m]))",
+            "legendFormat": "99th percentile"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 12}
+      },
+      {
+        "type": "timeseries",
+        "title": "vLLM Queue Time by Model",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(vllm:request_queue_time_seconds_bucket[5m]))",
+            "legendFormat": "Queue 95th %"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 12}
+      },
+      {
+        "type": "timeseries",
+        "title": "vLLM Success Rate by Model",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"vllm-service\", status=~\"2..\"}[1m]) / rate(http_requests_total{job=\"vllm-service\"}[1m]) * 100",
+            "legendFormat": "Success Rate %"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 18}
+      },
+      {
+        "type": "timeseries",
+        "title": "vLLM Error Rate by Model",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"vllm-service\", status=~\"4..|5..\"}[1m])",
+            "legendFormat": "Error Rate"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 18}
+      },
+      {
+        "type": "row",
+        "title": "TGI Model Performance",
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 24},
+        "collapsed": false
+      },
+      {
+        "type": "timeseries",
+        "title": "TGI Request Rate by Model",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(tgi_request_count[1m])",
+            "legendFormat": "TGI Requests/s"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 25}
+      },
+      {
+        "type": "timeseries",
+        "title": "TGI Success Rate by Model",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(tgi_request_success[1m]) / rate(tgi_request_count[1m]) * 100",
+            "legendFormat": "Success Rate %"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 25}
+      },
+      {
+        "type": "timeseries",
+        "title": "TGI Response Time by Model",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"tgi-service\"}[5m]))",
+            "legendFormat": "50th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"tgi-service\"}[5m]))",
+            "legendFormat": "95th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job=\"tgi-service\"}[5m]))",
+            "legendFormat": "99th percentile"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 31}
+      },
+      {
+        "type": "timeseries",
+        "title": "TGI Error Rate by Model",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(tgi_request_count[1m]) - rate(tgi_request_success[1m])",
+            "legendFormat": "Error Rate"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 31}
+      },
+      {
+        "type": "row",
+        "title": "Model-Specific Metrics",
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 37},
+        "collapsed": false
+      },
+      {
+        "type": "timeseries",
+        "title": "vLLM Model: Qwen/Qwen2.5-7B-Instruct-1M - Token Generation",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(vllm:iteration_tokens_total_sum{model_name=\"Qwen/Qwen2.5-7B-Instruct-1M\"}[1m])",
+            "legendFormat": "Tokens/s"
+          },
+          {
+            "expr": "vllm:iteration_tokens_total_sum{model_name=\"Qwen/Qwen2.5-7B-Instruct-1M\"}",
+            "legendFormat": "Total Tokens"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 38}
+      },
+      {
+        "type": "timeseries",
+        "title": "vLLM Model: Qwen/Qwen2.5-7B-Instruct-1M - Response Time",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(vllm:e2e_request_latency_seconds_bucket{model_name=\"Qwen/Qwen2.5-7B-Instruct-1M\"}[5m]))",
+            "legendFormat": "95th %"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(vllm:e2e_request_latency_seconds_bucket{model_name=\"Qwen/Qwen2.5-7B-Instruct-1M\"}[5m]))",
+            "legendFormat": "50th %"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 38}
+      },
+      {
+        "type": "timeseries",
+        "title": "vLLM Model: Qwen/Qwen2.5-7B-Instruct-1M - Request Rate",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"vllm-service\"}[1m])",
+            "legendFormat": "Requests/s"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"vllm-service\", status=~\"2..\"}[1m])",
+            "legendFormat": "Success/s"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 44}
+      },
+      {
+        "type": "timeseries",
+        "title": "vLLM Model: Qwen/Qwen2.5-7B-Instruct-1M - Queue Performance",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(vllm:request_queue_time_seconds_bucket[5m]))",
+            "legendFormat": "Queue 95th %"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(vllm:request_queue_time_seconds_bucket[5m]))",
+            "legendFormat": "Queue 50th %"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 44}
+      },
+      {
+        "type": "row",
+        "title": "Model Resource Utilization",
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 50},
+        "collapsed": false
+      },
+      {
+        "type": "timeseries",
+        "title": "GPU Utilization by Model",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "nvidia_gpu_utilization",
+            "legendFormat": "GPU Utilization %"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 8, "x": 0, "y": 51}
+      },
+      {
+        "type": "timeseries",
+        "title": "GPU Memory Usage by Model",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "nvidia_gpu_memory_used_bytes / 1024 / 1024 / 1024",
+            "legendFormat": "GPU Memory GB"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 8, "x": 8, "y": 51}
+      },
+      {
+        "type": "timeseries",
+        "title": "GPU Temperature by Model",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "nvidia_gpu_temperature_celsius",
+            "legendFormat": "GPU Temperature °C"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 8, "x": 16, "y": 51}
+      },
+      {
+        "type": "timeseries",
+        "title": "Model Service CPU Usage",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=\"chatqna-tgi-service\"}[1m])) * 100",
+            "legendFormat": "TGI CPU %"
+          },
+          {
+            "expr": "sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=\"chatqna-vllm-service\"}[1m])) * 100",
+            "legendFormat": "vLLM CPU %"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 57}
+      },
+      {
+        "type": "timeseries",
+        "title": "Model Service Memory Usage",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "container_memory_usage_bytes{container_label_com_docker_compose_service=\"chatqna-tgi-service\"} / 1024 / 1024",
+            "legendFormat": "TGI Memory MB"
+          },
+          {
+            "expr": "container_memory_usage_bytes{container_label_com_docker_compose_service=\"chatqna-vllm-service\"} / 1024 / 1024",
+            "legendFormat": "vLLM Memory MB"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 57}
+      },
+      {
+        "type": "row",
+        "title": "Model Performance Alerts",
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 63},
+        "collapsed": false
+      },
+      {
+        "type": "stat",
+        "title": "High Response Time Alert",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(vllm:e2e_request_latency_seconds_bucket[5m])) > 5",
+            "legendFormat": "vLLM > 5s"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"tgi-service\"}[5m])) > 5",
+            "legendFormat": "TGI > 5s"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "red", "value": 1}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 4, "w": 8, "x": 0, "y": 64}
+      },
+      {
+        "type": "stat",
+        "title": "High Error Rate Alert",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"vllm-service\", status=~\"4..|5..\"}[1m]) / rate(http_requests_total{job=\"vllm-service\"}[1m]) * 100 > 5",
+            "legendFormat": "vLLM > 5%"
+          },
+          {
+            "expr": "(rate(tgi_request_count[1m]) - rate(tgi_request_success[1m])) / rate(tgi_request_count[1m]) * 100 > 5",
+            "legendFormat": "TGI > 5%"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "red", "value": 1}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 4, "w": 8, "x": 8, "y": 64}
+      },
+      {
+        "type": "stat",
+        "title": "High GPU Utilization Alert",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "nvidia_gpu_utilization > 90",
+            "legendFormat": "GPU > 90%"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "red", "value": 1}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 4, "w": 8, "x": 16, "y": 64}
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": []
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "links": [],
+    "liveNow": false,
+    "style": "dark"
+  },
+  "folderId": 0,
+  "overwrite": true
+} 
