@@ -115,15 +115,15 @@ start_services() {
         exit 1
     fi
     
-    print_status "Starting DBQnA services with docker-compose..."
-    docker-compose -f compose_complete.yaml up -d
+    print_status "Starting DBQnA services with docker compose..."
+    docker compose -f compose_complete.yaml up -d
     
     print_status "Waiting for services to start..."
     sleep 30
     
     # Check service status
     print_status "Checking service status..."
-    docker-compose -f compose_complete.yaml ps
+    docker compose -f compose_complete.yaml ps
     
     print_status "DBQnA services started successfully!"
     print_status "Access points:"
@@ -144,7 +144,7 @@ stop_services() {
     fi
     
     print_status "Stopping DBQnA services..."
-    docker-compose -f compose_complete.yaml down
+    docker compose -f compose_complete.yaml down
     
     print_status "DBQnA services stopped successfully!"
 }
@@ -204,10 +204,10 @@ view_logs() {
     
     if [[ "$service" == "all" ]]; then
         print_status "Showing logs for all services..."
-        docker-compose -f compose_complete.yaml logs -f
+        docker compose -f compose_complete.yaml logs -f
     else
         print_status "Showing logs for $service..."
-        docker-compose -f compose_complete.yaml logs -f "$service"
+        docker compose -f compose_complete.yaml logs -f "$service"
     fi
 }
 
@@ -307,7 +307,7 @@ case "${1:-help}" in
             source set_env_complete.sh
         fi
         detect_services
-        docker-compose -f compose_complete.yaml ps
+        docker compose -f compose_complete.yaml ps
         ;;
     health)
         check_health
