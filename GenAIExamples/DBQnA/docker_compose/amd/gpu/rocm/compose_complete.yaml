@@ -1,0 +1,171 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  dbqna-postgres-db:
+    image: postgres:latest
+    container_name: dbqna-postgres-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${DBQNA_POSTGRES_PORT}:5432"
+    volumes:
+      - ./chinook.sql:/docker-entrypoint-initdb.d/chinook.sql
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - rocm_default
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 50
+
+  # TGI Service for LLM
+  dbqna-tgi-service:
+    image: ghcr.io/huggingface/text-generation-inference:2.4.1-rocm
+    container_name: dbqna-tgi-service
+    ports:
+      - "${DBQNA_TGI_SERVICE_PORT}:80"
+    volumes:
+      - "${MODEL_CACHE:-./data}:/data"
+    environment:
+      no_proxy: ${no_proxy:-}
+      http_proxy: ${http_proxy:-}
+      https_proxy: ${https_proxy:-}
+      HF_TOKEN: ${DBQNA_HUGGINGFACEHUB_API_TOKEN}
+      HF_HUB_DISABLE_PROGRESS_BARS: 1
+      HF_HUB_ENABLE_HF_TRANSFER: 0
+    shm_size: 1g
+    devices:
+      - /dev/kfd:/dev/kfd
+      - /dev/dri/:/dev/dri/
+    cap_add:
+      - SYS_PTRACE
+    group_add:
+      - video
+    security_opt:
+      - seccomp:unconfined
+    ipc: host
+    command: --model-id ${DBQNA_LLM_MODEL_ID} --max-input-length 2048 --max-total-tokens 4096
+    networks:
+      - rocm_default
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+
+  # Text-to-SQL Service
+  dbqna-text2sql-service:
+    image: ${REGISTRY:-opea}/text2sql:${TAG:-latest}
+    container_name: dbqna-text2sql-service
+    depends_on:
+      dbqna-postgres-db:
+        condition: service_healthy
+      dbqna-tgi-service:
+        condition: service_healthy
+    ports:
+      - "${DBQNA_TEXT_TO_SQL_PORT}:8080"
+    environment:
+      no_proxy: ${no_proxy:-}
+      http_proxy: ${http_proxy:-}
+      https_proxy: ${https_proxy:-}
+      TGI_LLM_ENDPOINT: http://dbqna-tgi-service:80
+      POSTGRES_HOST: dbqna-postgres-db
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      LOGFLAG: ${LOGFLAG:-INFO}
+    ipc: host
+    restart: unless-stopped
+    networks:
+      - rocm_default
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 50
+
+  # Backend Server (if needed for additional API endpoints)
+  dbqna-backend-server:
+    image: ${REGISTRY:-opea}/dbqna:${TAG:-latest}
+    container_name: dbqna-backend-server
+    depends_on:
+      dbqna-postgres-db:
+        condition: service_healthy
+      dbqna-text2sql-service:
+        condition: service_healthy
+    ports:
+      - "${DBQNA_BACKEND_SERVICE_PORT}:8888"
+    environment:
+      no_proxy: ${no_proxy:-}
+      https_proxy: ${https_proxy:-}
+      http_proxy: ${http_proxy:-}
+      MEGA_SERVICE_HOST_IP: ${HOST_IP}
+      TEXT2SQL_SERVICE_HOST_IP: dbqna-text2sql-service
+      TEXT2SQL_SERVICE_PORT: 8080
+      POSTGRES_SERVICE_HOST_IP: dbqna-postgres-db
+      POSTGRES_SERVICE_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      LLM_SERVER_HOST_IP: dbqna-tgi-service
+      LLM_SERVER_PORT: 80
+      LLM_MODEL: ${DBQNA_LLM_MODEL_ID}
+    ipc: host
+    restart: always
+    networks:
+      - rocm_default
+
+  # UI Server
+  dbqna-ui-server:
+    image: ${REGISTRY:-opea}/text2sql-react-ui:${TAG:-latest}
+    container_name: dbqna-ui-server
+    depends_on:
+      - dbqna-text2sql-service
+    ports:
+      - "${DBQNA_FRONTEND_SERVICE_PORT}:80"
+    environment:
+      no_proxy: ${no_proxy:-}
+      https_proxy: ${https_proxy:-}
+      http_proxy: ${http_proxy:-}
+      TEXT2SQL_SERVICE_URL: http://${HOST_IP_EXTERNAL}:${DBQNA_TEXT_TO_SQL_PORT}/v1/texttosql
+      POSTGRES_CONNECTION: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${HOST_IP_EXTERNAL}:${DBQNA_POSTGRES_PORT}/${POSTGRES_DB}"
+    ipc: host
+    restart: always
+    networks:
+      - rocm_default
+
+  # Nginx Server (Optional - for production)
+  dbqna-nginx-server:
+    image: ${REGISTRY:-opea}/nginx:${TAG:-latest}
+    container_name: dbqna-nginx-server
+    depends_on:
+      - dbqna-backend-server
+      - dbqna-ui-server
+    ports:
+      - "${DBQNA_NGINX_PORT}:80"
+    environment:
+      no_proxy: ${no_proxy:-}
+      https_proxy: ${https_proxy:-}
+      http_proxy: ${http_proxy:-}
+      FRONTEND_SERVICE_IP: ${DBQNA_FRONTEND_SERVICE_IP}
+      FRONTEND_SERVICE_PORT: ${DBQNA_FRONTEND_SERVICE_PORT}
+      BACKEND_SERVICE_NAME: ${DBQNA_BACKEND_SERVICE_NAME}
+      BACKEND_SERVICE_IP: ${DBQNA_BACKEND_SERVICE_IP}
+      BACKEND_SERVICE_PORT: ${DBQNA_BACKEND_SERVICE_PORT}
+    ipc: host
+    restart: always
+    networks:
+      - rocm_default
+
+volumes:
+  postgres_data:
+
+networks:
+  rocm_default:
+    driver: bridge 
