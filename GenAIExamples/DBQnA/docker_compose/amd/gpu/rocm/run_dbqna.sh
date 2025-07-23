@@ -107,8 +107,11 @@ setup_environment() {
 start_services() {
     print_header "Starting DBQnA Services"
     
-    if [[ -z "$HOST_IP" ]]; then
-        print_error "Environment not set up. Please run setup first."
+    # Source environment variables
+    if [[ -f "set_env_complete.sh" ]]; then
+        source set_env_complete.sh
+    else
+        print_error "Environment file not found. Please run setup first."
         exit 1
     fi
     
@@ -135,6 +138,11 @@ start_services() {
 stop_services() {
     print_header "Stopping DBQnA Services"
     
+    # Source environment variables
+    if [[ -f "set_env_complete.sh" ]]; then
+        source set_env_complete.sh
+    fi
+    
     print_status "Stopping DBQnA services..."
     docker-compose -f compose_complete.yaml down
     
@@ -153,6 +161,11 @@ restart_services() {
 # Function to check service health
 check_health() {
     print_header "Checking DBQnA Service Health"
+    
+    # Source environment variables
+    if [[ -f "set_env_complete.sh" ]]; then
+        source set_env_complete.sh
+    fi
     
     local services=(
         "dbqna-postgres-db:5432"
@@ -182,6 +195,11 @@ check_health() {
 view_logs() {
     print_header "DBQnA Service Logs"
     
+    # Source environment variables
+    if [[ -f "set_env_complete.sh" ]]; then
+        source set_env_complete.sh
+    fi
+    
     local service=${1:-"all"}
     
     if [[ "$service" == "all" ]]; then
@@ -197,8 +215,11 @@ view_logs() {
 test_api() {
     print_header "Testing DBQnA API"
     
-    if [[ -z "$HOST_IP_EXTERNAL" ]]; then
-        print_error "Environment not set up. Please run setup first."
+    # Source environment variables
+    if [[ -f "set_env_complete.sh" ]]; then
+        source set_env_complete.sh
+    else
+        print_error "Environment file not found. Please run setup first."
         exit 1
     fi
     
@@ -281,6 +302,10 @@ case "${1:-help}" in
         restart_services
         ;;
     status)
+        # Source environment variables
+        if [[ -f "set_env_complete.sh" ]]; then
+            source set_env_complete.sh
+        fi
         detect_services
         docker-compose -f compose_complete.yaml ps
         ;;
