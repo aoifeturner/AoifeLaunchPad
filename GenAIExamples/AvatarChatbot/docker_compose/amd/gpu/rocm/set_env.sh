@@ -8,8 +8,41 @@
 export HF_TOKEN=${HF_TOKEN}
 export OPENAI_API_KEY=${OPENAI_API_KEY}
 
-# Host IP is optional here since containers communicate via service names
-# export host_ip=$(hostname -I | awk '{print $1}')
+# Determine your IP addresses automatically
+export HOST_IP=$(hostname -I | awk '{print $1}')
+export HOST_IP_EXTERNAL=$(hostname -I | awk '{print $1}')
+
+# =============================================================================
+# PORT CONFIGURATION (using high port numbers like ChatQnA)
+# =============================================================================
+
+export AVATAR_WHISPER_PORT=18106
+export AVATAR_ASR_PORT=18101
+export AVATAR_SPEECHT5_PORT=18105
+export AVATAR_TTS_PORT=18102
+export AVATAR_TGI_SERVICE_PORT=18103
+export AVATAR_WAV2LIP_PORT=18107
+export AVATAR_ANIMATION_PORT=18108
+export AVATAR_BACKEND_SERVICE_PORT=18109
+export AVATAR_UI_PORT=18110
+
+# =============================================================================
+# SERVICE ENDPOINTS (External Access)
+# =============================================================================
+
+export AVATAR_WHISPER_ENDPOINT="http://${HOST_IP_EXTERNAL}:${AVATAR_WHISPER_PORT}"
+export AVATAR_ASR_ENDPOINT="http://${HOST_IP_EXTERNAL}:${AVATAR_ASR_PORT}"
+export AVATAR_SPEECHT5_ENDPOINT="http://${HOST_IP_EXTERNAL}:${AVATAR_SPEECHT5_PORT}"
+export AVATAR_TTS_ENDPOINT="http://${HOST_IP_EXTERNAL}:${AVATAR_TTS_PORT}"
+export AVATAR_TGI_ENDPOINT="http://${HOST_IP_EXTERNAL}:${AVATAR_TGI_SERVICE_PORT}"
+export AVATAR_WAV2LIP_ENDPOINT="http://${HOST_IP_EXTERNAL}:${AVATAR_WAV2LIP_PORT}"
+export AVATAR_ANIMATION_ENDPOINT="http://${HOST_IP_EXTERNAL}:${AVATAR_ANIMATION_PORT}"
+export AVATAR_BACKEND_ENDPOINT="http://${HOST_IP_EXTERNAL}:${AVATAR_BACKEND_SERVICE_PORT}/v1/avatarchatbot"
+export AVATAR_UI_ENDPOINT="http://${HOST_IP_EXTERNAL}:${AVATAR_UI_PORT}"
+
+# =============================================================================
+# INTER-CONTAINER COMMUNICATION CONFIGURATION (Container names from compose)
+# =============================================================================
 
 # Text Generation Inference (LLM) service
 export TGI_SERVICE_PORT=80
@@ -53,7 +86,29 @@ export ASR_SERVICE_HOST_IP="asr-service"
 export TTS_SERVICE_HOST_IP="tts-service"
 export ANIMATION_SERVICE_HOST_IP="animation-server"
 
-# Device and inference settings
+# =============================================================================
+# MODEL CONFIGURATION
+# =============================================================================
+
+export MODEL_CACHE=./data
+
+# =============================================================================
+# DOCKER REGISTRY CONFIGURATION
+# =============================================================================
+
+export REGISTRY=opea
+export TAG=latest
+
+# =============================================================================
+# LOGGING CONFIGURATION
+# =============================================================================
+
+export LOGFLAG=INFO
+
+# =============================================================================
+# DEVICE AND INFERENCE SETTINGS
+# =============================================================================
+
 export DEVICE="cpu"
 export INFERENCE_MODE='wav2lip+gfpgan'
 export CHECKPOINT_PATH='/usr/local/lib/python3.11/site-packages/Wav2Lip/checkpoints/wav2lip_gan.pth'
@@ -68,3 +123,24 @@ export OUTFILE="./outputs/result.mp4"
 export GFPGAN_MODEL_VERSION=1.4  # can roll back to v1.3 if needed
 export UPSCALE_FACTOR=1
 export FPS=5
+
+# =============================================================================
+# DISPLAY CONFIGURATION
+# =============================================================================
+
+echo "✅ AvatarChatBot environment configuration loaded"
+echo "🌐 Host IP: ${HOST_IP}"
+echo "🔗 Backend Endpoint: ${AVATAR_BACKEND_ENDPOINT}"
+echo "🎨 UI Endpoint: ${AVATAR_UI_ENDPOINT}"
+echo ""
+echo "📋 Service Ports:"
+echo "  Whisper: ${AVATAR_WHISPER_PORT}"
+echo "  ASR: ${AVATAR_ASR_PORT}"
+echo "  SpeechT5: ${AVATAR_SPEECHT5_PORT}"
+echo "  TTS: ${AVATAR_TTS_PORT}"
+echo "  TGI: ${AVATAR_TGI_SERVICE_PORT}"
+echo "  Wav2Lip: ${AVATAR_WAV2LIP_PORT}"
+echo "  Animation: ${AVATAR_ANIMATION_PORT}"
+echo "  Backend: ${AVATAR_BACKEND_SERVICE_PORT}"
+echo "  UI: ${AVATAR_UI_PORT}"
+

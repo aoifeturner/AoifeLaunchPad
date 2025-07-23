@@ -115,15 +115,13 @@ restart_services() {
 start_monitoring() {
     print_header "Starting Monitoring Stack"
     check_docker
-    if [[ -f "start_monitoring.sh" ]]; then
-        print_status "Starting Prometheus and Grafana..."
-        ./start_monitoring.sh
-        print_status "Monitoring stack started!"
-        print_status "Grafana: http://localhost:3000 (admin/admin)"
-        print_status "Prometheus: http://localhost:9090"
-    else
-        print_warning "start_monitoring.sh not found. Skipping monitoring startup."
-    fi
+    
+    print_status "Starting Prometheus and Grafana..."
+    ./start_monitoring.sh
+    
+    print_status "Monitoring stack started!"
+    print_status "Grafana: http://localhost:3000 (admin/admin)"
+    print_status "Prometheus: http://localhost:9090"
 }
 
 # Function to stop monitoring

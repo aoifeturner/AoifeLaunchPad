@@ -2,10 +2,10 @@ version: '3.8'
 
 services:
   whisper-service:
-    image: ${REGISTRY:-opea}/whisper:${TAG:-latest}
+    image: opea/whisper:latest
     container_name: whisper-service
     ports:
-      - "7066:7066"
+      - "${AVATAR_WHISPER_PORT:-18106}:7066"
     ipc: host
     environment:
       no_proxy: ${no_proxy:-}
@@ -16,10 +16,10 @@ services:
       - rocm_default
 
   asr:
-    image: ${REGISTRY:-opea}/asr:${TAG:-latest}
+    image: opea/asr:latest
     container_name: asr-service
     ports:
-      - "3001:9099"
+      - "${AVATAR_ASR_PORT:-18101}:9099"
     ipc: host
     environment:
       ASR_ENDPOINT: ${ASR_ENDPOINT}
@@ -27,10 +27,10 @@ services:
       - rocm_default
 
   speecht5-service:
-    image: ${REGISTRY:-opea}/speecht5:${TAG:-latest}
+    image: opea/speecht5:latest
     container_name: speecht5-service
     ports:
-      - "7055:7055"
+      - "${AVATAR_SPEECHT5_PORT:-18105}:7055"
     ipc: host
     environment:
       no_proxy: ${no_proxy:-}
@@ -41,10 +41,10 @@ services:
       - rocm_default
 
   tts:
-    image: ${REGISTRY:-opea}/tts:${TAG:-latest}
+    image: opea/tts:latest
     container_name: tts-service
     ports:
-      - "3002:9088"
+      - "${AVATAR_TTS_PORT:-18102}:9088"
     ipc: host
     environment:
       TTS_ENDPOINT: ${TTS_ENDPOINT}
@@ -52,10 +52,10 @@ services:
       - rocm_default
 
   tgi-service:
-    image: ghcr.io/huggingface/text-generation-inference:6.4.1-rocm
+    image: ghcr.io/huggingface/text-generation-inference:2.3.1
     container_name: tgi-service
     ports:
-      - "${TGI_SERVICE_PORT:-3006}:80"
+      - "${AVATAR_TGI_SERVICE_PORT:-18106}:80"
     volumes:
       - "${MODEL_CACHE:-./data}:/data"
     environment:
@@ -70,10 +70,10 @@ services:
       - rocm_default
 
   wav2lip-service:
-    image: ${REGISTRY:-opea}/wav2lip:${TAG:-latest}
+    image: opea/wav2lip:latest
     container_name: wav2lip-service
     ports:
-      - "7860:7860"
+      - "${AVATAR_WAV2LIP_PORT:-18107}:7860"
     ipc: host
     volumes:
       - ${PWD}:/outputs
@@ -97,10 +97,10 @@ services:
       - rocm_default
 
   animation:
-    image: ${REGISTRY:-opea}/animation:${TAG:-latest}
+    image: opea/animation:latest
     container_name: animation-server
     ports:
-      - "3008:9066"
+      - "${AVATAR_ANIMATION_PORT:-18108}:9066"
     ipc: host
     environment:
       no_proxy: ${no_proxy:-}
@@ -112,7 +112,7 @@ services:
       - rocm_default
 
   avatarchatbot-backend-server:
-    image: ${REGISTRY:-opea}/avatarchatbot:${TAG:-latest}
+    image: opea/avatarchatbot:latest
     container_name: avatarchatbot-backend-server
     depends_on:
       - asr
@@ -120,7 +120,7 @@ services:
       - tts
       - animation
     ports:
-      - "3009:8888"
+      - "${AVATAR_BACKEND_SERVICE_PORT:-18109}:8888"
     environment:
       no_proxy: ${no_proxy:-}
       https_proxy: ${https_proxy:-}
